@@ -196,7 +196,7 @@ define anything not defined through the command line to 0
 	#define PX_DEBUG 0
 #endif
 #ifndef PX_CHECKED
-	#define PX_CHECKED 0
+	#define PX_CHECKED 1
 #endif
 #ifndef PX_PROFILE
 	#define PX_PROFILE 0

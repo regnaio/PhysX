@@ -2571,6 +2571,20 @@ interface PxSphericalJointFlags {
 };
 
 [Prefix="physx::"]
+interface PxGearJoint {
+    void setGearRatio(float ratio);
+    float getGearRatio();
+};
+PxGearJoint implements PxJoint;
+
+[Prefix="physx::"]
+interface PxRackAndPinionJoint {
+    void setRatio(float ratio);
+    float getRatio();
+};
+PxRackAndPinionJoint implements PxJoint;
+
+[Prefix="physx::"]
 interface PxSpring {
     void PxSpring(float stiffness, float damping);
     attribute float stiffness;
@@ -2713,6 +2727,8 @@ interface PxTopLevelFunctions {
     static PxPrismaticJoint PrismaticJointCreate([Ref] PxPhysics physics, PxRigidActor actor0, [Ref] PxTransform localFrame0, PxRigidActor actor1, [Ref] PxTransform localFrame1);
     static PxRevoluteJoint RevoluteJointCreate([Ref] PxPhysics physics, PxRigidActor actor0, [Ref] PxTransform localFrame0, PxRigidActor actor1, [Ref] PxTransform localFrame1);
     static PxSphericalJoint SphericalJointCreate([Ref] PxPhysics physics, PxRigidActor actor0, [Ref] PxTransform localFrame0, PxRigidActor actor1, [Ref] PxTransform localFrame1);
+    static PxGearJoint GearJointCreate([Ref] PxPhysics physics, PxRigidActor actor0, [Ref] PxTransform localFrame0, PxRigidActor actor1, [Ref] PxTransform localFrame1);
+    static PxRackAndPinionJoint RackAndPinionJointCreate([Ref] PxPhysics physics, PxRigidActor actor0, [Ref] PxTransform localFrame0, PxRigidActor actor1, [Ref] PxTransform localFrame1);
     static PxConvexMesh CreateConvexMesh([Const, Ref] PxCookingParams params, [Const, Ref] PxConvexMeshDesc desc);
     static PxTriangleMesh CreateTriangleMesh([Const, Ref] PxCookingParams params, [Const, Ref] PxTriangleMeshDesc desc);
     static PxHeightField CreateHeightField([Const, Ref] PxHeightFieldDesc desc);
