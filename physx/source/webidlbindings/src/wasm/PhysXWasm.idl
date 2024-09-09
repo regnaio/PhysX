@@ -2572,6 +2572,8 @@ interface PxSphericalJointFlags {
 
 [Prefix="physx::"]
 interface PxGearJoint {
+    boolean setHinges([Const] PxBase hinge0, [Const] PxBase hinge1);
+    void getHinges([Const, Ref] PxBase hinge0, [Const, Ref] PxBase hinge1);
     void setGearRatio(float ratio);
     float getGearRatio();
 };
