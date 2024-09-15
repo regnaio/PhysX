@@ -2231,7 +2231,7 @@ interface PxPvdSceneClient {
     void setScenePvdFlag(PxPvdSceneFlagEnum flag, boolean value);
     void setScenePvdFlags([Ref] PxPvdSceneFlags flags);
     [Value] PxPvdSceneFlags getScenePvdFlags();
-}
+};
 
 [Prefix="physx::", NoDelete]
 interface PxScene {
