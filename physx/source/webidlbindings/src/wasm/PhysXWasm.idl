@@ -2319,6 +2319,7 @@ interface PxScene {
     [Ref] PxPhysics getPhysics();
     unsigned long getTimestamp();
     attribute VoidPtr userData;
+    PxPvdSceneClient getScenePvdClient();
 };
 PxScene implements PxSceneSQSystem;
 
