@@ -210,6 +210,9 @@ define anything not defined through the command line to 0
 #ifndef PX_DOXYGEN
 	#define PX_DOXYGEN 0
 #endif
+#ifndef PX_SUPPORT_PVD
+	#define PX_SUPPORT_PVD 0
+#endif
 
 /**
 family shortcuts
