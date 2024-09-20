@@ -2219,21 +2219,6 @@ interface PxRigidStatic {
 };
 PxRigidStatic implements PxRigidActor;
 
-[Prefix="physx::"]
-interface PxPvdSceneFlags {
-    void PxPvdSceneFlags(unsigned long flags);
-    boolean isSet(PxPvdSceneFlagEnum flag);
-    void raise(PxPvdSceneFlagEnum flag);
-    void clear(PxPvdSceneFlagEnum flag);
-};
-
-[Prefix="physx::", NoDelete]
-interface PxPvdSceneClient {
-    void setScenePvdFlag(PxPvdSceneFlagEnum flag, boolean value);
-    void setScenePvdFlags([Ref] PxPvdSceneFlags flags);
-    [Value] PxPvdSceneFlags getScenePvdFlags();
-};
-
 [Prefix="physx::", NoDelete]
 interface PxScene {
     boolean addActor([Ref] PxActor actor, [Const] optional PxBVH bvh);
@@ -2320,7 +2305,6 @@ interface PxScene {
     [Ref] PxPhysics getPhysics();
     unsigned long getTimestamp();
     attribute VoidPtr userData;
-    PxPvdSceneClient getScenePvdClient();
 };
 PxScene implements PxSceneSQSystem;
 
@@ -4289,12 +4273,6 @@ enum PxRigidDynamicLockFlagEnum {
     "PxRigidDynamicLockFlagEnum::eLOCK_ANGULAR_X",
     "PxRigidDynamicLockFlagEnum::eLOCK_ANGULAR_Y",
     "PxRigidDynamicLockFlagEnum::eLOCK_ANGULAR_Z"
-};
-
-enum PxPvdSceneFlagEnum {
-    "PxPvdSceneFlagEnum::eTRANSMIT_CONTACTS",
-    "PxPvdSceneFlagEnum::eTRANSMIT_SCENEQUERIES",
-    "PxPvdSceneFlagEnum::eTRANSMIT_CONSTRAINTS",
 };
 
 enum PxSceneFlagEnum {

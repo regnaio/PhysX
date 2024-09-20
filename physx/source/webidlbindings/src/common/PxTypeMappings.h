@@ -163,7 +163,6 @@ typedef physx::PxRevoluteJointFlag::Enum PxRevoluteJointFlagEnum;
 typedef physx::PxRigidBodyFlag::Enum PxRigidBodyFlagEnum;
 typedef physx::PxRigidDynamicLockFlag::Enum PxRigidDynamicLockFlagEnum;
 typedef physx::PxSceneFlag::Enum PxSceneFlagEnum;
-typedef physx::PxPvdSceneFlag::Enum PxPvdSceneFlagEnum;
 typedef physx::PxSceneQueryUpdateMode::Enum PxSceneQueryUpdateModeEnum;
 typedef physx::PxShapeFlag::Enum PxShapeFlagEnum;
 typedef physx::PxSphericalJointFlag::Enum PxSphericalJointFlagEnum;
