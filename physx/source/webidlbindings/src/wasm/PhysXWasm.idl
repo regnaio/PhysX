@@ -1667,7 +1667,8 @@ PxJointLinearLimit implements PxJointLimitParameters;
 
 [Prefix="physx::"]
 interface PxJointLinearLimitPair {
-    void PxJointLinearLimitPair(float lowerLimit, float upperLimit, [Const, Ref] PxSpring spring);
+    void PxJointLinearLimitPair([Const, Ref] PxTolerancesScale scale, optional float lowerLimit, optional float upperLimit);
+    // void PxJointLinearLimitPair(float lowerLimit, float upperLimit, [Const, Ref] PxSpring spring);
     attribute float upper;
     attribute float lower;
 };
