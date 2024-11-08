@@ -393,6 +393,14 @@ struct PxTopLevelFunctions {
     static void IntegrateTransform(const physx::PxTransform& curTrans, const physx::PxVec3& linvel, const physx::PxVec3& angvel, physx::PxReal timeStep, physx::PxTransform& result) {
         return PxIntegrateTransform(curTrans, linvel, angvel, timeStep, result);
     }
+
+    static bool CookTriangleMesh(const physx::PxCookingParams& params, const physx::PxTriangleMeshDesc& desc, physx::PxOutputStream& stream) {
+        return PxCookTriangleMesh(params, desc, stream);
+    }
+
+    static bool CookConvexMesh(const physx::PxCookingParams& params, const physx::PxConvexMeshDesc& desc, physx::PxOutputStream& stream) {
+        return PxCookConvexMesh(params, desc, stream);
+    }
 };
 
 struct PxVehicleTopLevelFunctions {

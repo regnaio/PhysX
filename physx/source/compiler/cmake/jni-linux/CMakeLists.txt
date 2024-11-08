@@ -79,6 +79,10 @@ SET(CLANG_WARNINGS "-ferror-limit=0 -Wall -Wextra -Werror -Wstrict-aliasing=2 -W
     -Wno-extra-semi \
     -Wno-conditional-uninitialized \
     -Wno-unused-parameter \
+    -Wno-unsafe-buffer-usage \
+    -Wno-invalid-offsetof \
+    -Wno-switch-default \
+    -Wno-unused-but-set-variable \
 ")
 
 

@@ -2,6 +2,7 @@
 #define PX_TYPE_MAPPINGS_H
 
 #include "PxPhysicsAPI.h"
+#include <cstring> // for memcpy
 
 // typedefs for vehicle lookup tables
 typedef physx::vehicle2::PxVehicleFixedSizeLookupTable<physx::PxReal,3> PxVehicleFixedSizeLookupTableFloat_3;
@@ -52,6 +53,11 @@ public:
     PX_INLINE T& at(uint32_t index) { return this->operator[](index); }
     PX_INLINE void push_back(const T& value) { this->pushBack(value); }
     PX_INLINE T* data() { return this->begin(); }
+    PX_INLINE void setFromBuffer(const void* buffer, uint32_t size) {
+        this->reset();
+        this->resize(size);
+        std::memcpy(this->begin(), buffer, size * sizeof(T));
+    }
 };
 
 class PxArray_PxVec3 : public PxArrayExt<physx::PxVec3> {
