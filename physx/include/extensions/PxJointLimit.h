@@ -143,6 +143,8 @@ public:
 	*/
 	PxReal value;
 
+	PxJointLinearLimit() {}
+
 	/**
 	\brief construct a linear hard limit
 
@@ -196,6 +198,8 @@ public:
 	<b>Default:</b> lower = -PX_MAX_F32/3, upper = PX_MAX_F32/3
 	*/
 	PxReal upper, lower;
+
+	PxJointLinearLimitPair() {}
 
 	/**
 	\brief Construct a linear hard limit pair. The lower distance value must be less than the upper distance value. 
@@ -255,6 +259,8 @@ public:
 	<b>Default:</b> lower = -PI/2, upper = PI/2
 	*/
 	PxReal upper, lower;
+
+	PxJointAngularLimitPair() {}
 
 	/**
 	\brief construct an angular hard limit pair. 
@@ -330,6 +336,8 @@ public:
 	<b>Default:</b> PI/2
 	*/
 	PxReal zAngle;
+
+	PxJointLimitCone() {}
 
 	/**
 	\brief Construct a cone hard limit. 
@@ -419,6 +427,8 @@ public:
 	<b>Default:</b> PI/2
 	*/
 	PxReal zAngleMax;
+
+	PxJointLimitPyramid() {}
 
 	/**
 	\brief Construct a pyramid hard limit. 
