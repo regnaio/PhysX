@@ -1253,13 +1253,13 @@ interface PxD6Joint {
     float getSwingYAngle();
     float getSwingZAngle();
     void setDistanceLimit([Const, Ref] PxJointLinearLimit limit);
-    PxJointLinearLimit getDistanceLimit();
+    [Value] PxJointLinearLimit getDistanceLimit();
     void setLinearLimit(PxD6AxisEnum axis, [Const, Ref] PxJointLinearLimitPair limit);
-    PxJointLinearLimitPair getLinearLimit(PxD6AxisEnum axis);
+    [Value] PxJointLinearLimitPair getLinearLimit(PxD6AxisEnum axis);
     void setTwistLimit([Const, Ref] PxJointAngularLimitPair limit);
-    PxJointAngularLimitPair getTwistLimit();
+    [Value] PxJointAngularLimitPair getTwistLimit();
     void setSwingLimit([Const, Ref] PxJointLimitCone limit);
-    PxJointLimitCone getSwingLimit();
+    [Value] PxJointLimitCone getSwingLimit();
     void setPyramidSwingLimit([Const, Ref] PxJointLimitPyramid limit);
     PxJointLimitPyramid getPyramidSwingLimit();
     void setDrive(PxD6DriveEnum index, [Const, Ref] PxD6JointDrive drive);
