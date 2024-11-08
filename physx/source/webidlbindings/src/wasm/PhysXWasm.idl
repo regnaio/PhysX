@@ -1255,7 +1255,7 @@ interface PxD6Joint {
     void setDistanceLimit([Const, Ref] PxJointLinearLimit limit);
     PxJointLinearLimit getDistanceLimit();
     void setLinearLimit(PxD6AxisEnum axis, [Const, Ref] PxJointLinearLimitPair limit);
-    PxJointLinearLimitPair getLinearLimit(PxD6AxisEnum axis)
+    PxJointLinearLimitPair getLinearLimit(PxD6AxisEnum axis);
     void setTwistLimit([Const, Ref] PxJointAngularLimitPair limit);
     PxJointAngularLimitPair getTwistLimit();
     void setSwingLimit([Const, Ref] PxJointLimitCone limit);
