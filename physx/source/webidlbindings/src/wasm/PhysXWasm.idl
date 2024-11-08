@@ -1253,10 +1253,15 @@ interface PxD6Joint {
     float getSwingYAngle();
     float getSwingZAngle();
     void setDistanceLimit([Const, Ref] PxJointLinearLimit limit);
+    PxJointLinearLimit getDistanceLimit();
     void setLinearLimit(PxD6AxisEnum axis, [Const, Ref] PxJointLinearLimitPair limit);
+    PxJointLinearLimitPair getLinearLimit(PxD6AxisEnum axis)
     void setTwistLimit([Const, Ref] PxJointAngularLimitPair limit);
+    PxJointAngularLimitPair getTwistLimit();
     void setSwingLimit([Const, Ref] PxJointLimitCone limit);
+    PxJointLimitCone getSwingLimit();
     void setPyramidSwingLimit([Const, Ref] PxJointLimitPyramid limit);
+    PxJointLimitPyramid getPyramidSwingLimit();
     void setDrive(PxD6DriveEnum index, [Const, Ref] PxD6JointDrive drive);
     [Value] PxD6JointDrive getDrive(PxD6DriveEnum index);
     void setDrivePosition([Const, Ref] PxTransform pose, optional boolean autowake);
@@ -2598,14 +2603,6 @@ interface PxSphericalJointFlags {
 };
 
 [Prefix="physx::"]
-interface PxGearJoint {
-    boolean setHinges([Const] PxBase hinge0, [Const] PxBase hinge1);
-    void setGearRatio(float ratio);
-    float getGearRatio();
-};
-PxGearJoint implements PxJoint;
-
-[Prefix="physx::"]
 interface PxRackAndPinionJoint {
     boolean setJoints([Const] PxBase hinge, [Const] PxBase prismatic);
     void setRatio(float ratio);
@@ -2762,7 +2759,6 @@ interface PxTopLevelFunctions {
     static PxRackAndPinionJoint RackAndPinionJointCreate([Ref] PxPhysics physics, PxRigidActor actor0, [Ref] PxTransform localFrame0, PxRigidActor actor1, [Ref] PxTransform localFrame1);
     static PxRevoluteJoint RevoluteJointCreate([Ref] PxPhysics physics, PxRigidActor actor0, [Ref] PxTransform localFrame0, PxRigidActor actor1, [Ref] PxTransform localFrame1);
     static PxSphericalJoint SphericalJointCreate([Ref] PxPhysics physics, PxRigidActor actor0, [Ref] PxTransform localFrame0, PxRigidActor actor1, [Ref] PxTransform localFrame1);
-    static PxGearJoint GearJointCreate([Ref] PxPhysics physics, PxRigidActor actor0, [Ref] PxTransform localFrame0, PxRigidActor actor1, [Ref] PxTransform localFrame1);
     static PxRackAndPinionJoint RackAndPinionJointCreate([Ref] PxPhysics physics, PxRigidActor actor0, [Ref] PxTransform localFrame0, PxRigidActor actor1, [Ref] PxTransform localFrame1);
     static PxConvexMesh CreateConvexMesh([Const, Ref] PxCookingParams params, [Const, Ref] PxConvexMeshDesc desc);
     static PxTriangleMesh CreateTriangleMesh([Const, Ref] PxCookingParams params, [Const, Ref] PxTriangleMeshDesc desc);
