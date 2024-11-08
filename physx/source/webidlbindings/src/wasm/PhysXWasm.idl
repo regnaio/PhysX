@@ -1674,6 +1674,7 @@ PxJointLimitPyramid implements PxJointLimitParameters;
 
 [Prefix="physx::"]
 interface PxJointLinearLimit {
+    void PxJointLinearLimit(float extent);
     void PxJointLinearLimit(float extent, [Const, Ref] PxSpring spring);
     attribute float value;
 };
