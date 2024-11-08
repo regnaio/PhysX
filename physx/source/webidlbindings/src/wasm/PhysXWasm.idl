@@ -1253,7 +1253,7 @@ interface PxD6Joint {
     float getSwingYAngle();
     float getSwingZAngle();
     void setDistanceLimit([Const, Ref] PxJointLinearLimit limit);
-    [Value] PxJointLinearLimit getDistanceLimit();
+    // [Value] PxJointLinearLimit getDistanceLimit();
     void setLinearLimit(PxD6AxisEnum axis, [Const, Ref] PxJointLinearLimitPair limit);
     [Value] PxJointLinearLimitPair getLinearLimit(PxD6AxisEnum axis);
     void setTwistLimit([Const, Ref] PxJointAngularLimitPair limit);
@@ -1674,7 +1674,7 @@ PxJointLimitPyramid implements PxJointLimitParameters;
 
 [Prefix="physx::"]
 interface PxJointLinearLimit {
-    void PxJointLinearLimit(float extent);
+    // void PxJointLinearLimit(float extent);
     void PxJointLinearLimit(float extent, [Const, Ref] PxSpring spring);
     attribute float value;
 };
