@@ -1257,11 +1257,11 @@ interface PxD6Joint {
     void setLinearLimit(PxD6AxisEnum axis, [Const, Ref] PxJointLinearLimitPair limit);
     [Value] PxJointLinearLimitPair getLinearLimit(PxD6AxisEnum axis);
     void setTwistLimit([Const, Ref] PxJointAngularLimitPair limit);
-    [Value] PxJointAngularLimitPair getTwistLimit();
+    // [Value] PxJointAngularLimitPair getTwistLimit();
     void setSwingLimit([Const, Ref] PxJointLimitCone limit);
-    [Value] PxJointLimitCone getSwingLimit();
+    // [Value] PxJointLimitCone getSwingLimit();
     void setPyramidSwingLimit([Const, Ref] PxJointLimitPyramid limit);
-    PxJointLimitPyramid getPyramidSwingLimit();
+    // [Value] PxJointLimitPyramid getPyramidSwingLimit();
     void setDrive(PxD6DriveEnum index, [Const, Ref] PxD6JointDrive drive);
     [Value] PxD6JointDrive getDrive(PxD6DriveEnum index);
     void setDrivePosition([Const, Ref] PxTransform pose, optional boolean autowake);
