@@ -22,14 +22,28 @@
 ## (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 ## OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ##
-## Copyright (c) 2008-2022 NVIDIA Corporation. All rights reserved.
+## Copyright (c) 2008-2025 NVIDIA Corporation. All rights reserved.
 
 # We define the CXX flags for this CMakeLists and all others that are included afterwards. This is a GLOBAL setting. 
 # If/when the solutions go standalone (say, samples and visual tests) - those CMakeLists will need to be fixed.
 
 STRING(TOLOWER "${CMAKE_BUILD_TYPE}" CMAKE_BUILD_TYPE_LOWERCASE)
 
-SET(PHYSX_WARNING_DISABLES "-Wno-invalid-offsetof -Wno-invalid-noreturn -Wno-unused-private-field -Wno-deprecated-copy -Wno-unused-variable -Wno-variadic-macros -Wno-array-bounds -Wno-strict-aliasing -Wno-bitwise-instead-of-logical -Wno-unused-but-set-variable -Wno-unused-parameter")
+SET(PHYSX_WARNING_DISABLES "-Wno-invalid-offsetof \
+    -Wno-invalid-noreturn \
+    -Wno-unused-private-field \
+    -Wno-deprecated-copy \
+    -Wno-unused-variable \
+    -Wno-variadic-macros \
+    -Wno-array-bounds \
+    -Wno-strict-aliasing \
+    -Wno-bitwise-instead-of-logical \
+    -Wno-unused-but-set-variable \
+    -Wno-unused-parameter \
+    -Wno-inconsistent-missing-override \
+    -Wno-inconsistent-missing-destructor-override \
+    -Wno-unused-function \
+")
 
 IF(${ANDROID_ABI} STREQUAL "armeabi-v7a")
 	SET(PHYSX_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Werror -Wall -Wextra -Wpedantic -std=c++11 -fno-rtti -fno-exceptions -ffunction-sections -fdata-sections -funwind-tables -fomit-frame-pointer -funswitch-loops -finline-limit=300 -fno-strict-aliasing -fstack-protector ${PHYSX_WARNING_DISABLES}" CACHE INTERNAL "PhysX CXX")
@@ -96,7 +110,6 @@ INCLUDE(PhysXCommon.cmake)
 INCLUDE(PhysXCooking.cmake)
 INCLUDE(PhysXExtensions.cmake)
 INCLUDE(PhysXVehicle.cmake)
-INCLUDE(PhysXVehicle2.cmake)
 INCLUDE(SceneQuery.cmake)
 INCLUDE(SimulationController.cmake)
 INCLUDE(PhysXPvdSDK.cmake)
@@ -109,7 +122,6 @@ SET_PROPERTY(TARGET PhysXCharacterKinematic PROPERTY FOLDER "PhysX SDK")
 SET_PROPERTY(TARGET PhysXCommon PROPERTY FOLDER "PhysX SDK")
 SET_PROPERTY(TARGET PhysXCooking PROPERTY FOLDER "PhysX SDK")
 SET_PROPERTY(TARGET PhysXExtensions PROPERTY FOLDER "PhysX SDK")
-SET_PROPERTY(TARGET PhysXVehicle PROPERTY FOLDER "PhysX SDK")
 SET_PROPERTY(TARGET PhysXVehicle2 PROPERTY FOLDER "PhysX SDK")
 SET_PROPERTY(TARGET LowLevel PROPERTY FOLDER "PhysX SDK")
 SET_PROPERTY(TARGET LowLevelAABB PROPERTY FOLDER "PhysX SDK")

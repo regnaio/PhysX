@@ -22,7 +22,7 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
-// Copyright (c) 2008-2024 NVIDIA Corporation. All rights reserved.
+// Copyright (c) 2008-2025 NVIDIA Corporation. All rights reserved.
 // Copyright (c) 2004-2008 AGEIA Technologies, Inc. All rights reserved.
 // Copyright (c) 2001-2004 NovodeX AG. All rights reserved.
 #ifndef PX_PHYSICS_NXPHYSICSWITHEXTENSIONS_API
@@ -47,6 +47,8 @@ static DisabledPropertyEntry gDisabledProperties[] = {
 	DisabledPropertyEntry( "PxSceneDesc", "TolerancesScale" ),
 	DisabledPropertyEntry( "PxSceneDesc", "IsValid" ),
 	DisabledPropertyEntry( "PxSceneDesc", "SceneQuerySystem" ),
+    DisabledPropertyEntry( "PxSceneDesc", "DeformableSurfacePostSolveCallback" ),
+    DisabledPropertyEntry( "PxSceneDesc", "DeformableVolumePostSolveCallback" ),
 	DisabledPropertyEntry( "PxShape", "Actor" ),
 	DisabledPropertyEntry( "PxShape", "Geometry" ),
 	DisabledPropertyEntry("PxShape", "GPUIndex"),
@@ -94,7 +96,6 @@ static DisabledPropertyEntry gDisabledProperties[] = {
 	DisabledPropertyEntry( "PxCustomGeometry", "Callbacks" ),
 	DisabledPropertyEntry( "PxJoint", "ClassName" ),
 	DisabledPropertyEntry( "PxDistanceJoint", "ClassName" ),
-	DisabledPropertyEntry( "PxContactJoint", "ClassName"),
 	DisabledPropertyEntry( "PxGearJoint", "ClassName"),
 	DisabledPropertyEntry( "PxRackAndPinionJoint", "ClassName"),
 	DisabledPropertyEntry( "PxFixedJoint", "ClassName" ),
@@ -111,14 +112,15 @@ static DisabledPropertyEntry gDisabledProperties[] = {
 	DisabledPropertyEntry( "PxJointLimitPyramid", "IsValid" ),
 	DisabledPropertyEntry( "PxD6JointDrive", "IsValid" ),
 	DisabledPropertyEntry( "PxScene", "ParticleSystems"),
-	DisabledPropertyEntry( "PxScene", "FEMCloths"),
-	DisabledPropertyEntry( "PxScene", "HairSystems"),
+	DisabledPropertyEntry( "PxScene", "DeformableSurfaces"),
 	// PT: added this for PVD-315. It's a mystery to me why we don't need to do that here for PxConvexMeshDesc. Maybe because the convex desc is in the cooking lib.
 	DisabledPropertyEntry( "PxHeightFieldDesc", "IsValid" ),
 //	DisabledPropertyEntry( "PxConstraint", "IsValid" ),
 //	DisabledPropertyEntry( "PxTolerancesScale", "IsValid" ),
 	DisabledPropertyEntry( "PxConstraint", "SolverResidual" ),
 	DisabledPropertyEntry( "PxArticulationReducedCoordinate", "SolverResidual" ),
+    DisabledPropertyEntry( "PxConstraint", "GPUIndex"),
+    DisabledPropertyEntry( "PxD6Joint", "GPUIndex"),
 };
 
 //Append these properties to this type.
@@ -143,11 +145,13 @@ static const char* gImportantPhysXTypes[] =
 	"PxArticulationReducedCoordinate",
 	"PxArticulationLink",
 	"PxMaterial",
-	"PxFEMSoftBodyMaterial",
+	"PxDeformableSurfaceMaterial",
+	"PxDeformableVolumeMaterial",
 	"PxPBDMaterial",
 	"PxArticulationJointReducedCoordinate",
 	"PxArticulationLimit",
 	"PxArticulationDrive",
+	"PxJointFrictionParams",
 	"PxScene",
 	"PxPhysics",
 	"PxHeightFieldDesc",
@@ -189,7 +193,6 @@ static const char* gExtensionPhysXTypes[] =
 	"PxDistanceJoint",
 	"PxGearJoint",
 	"PxRackAndPinionJoint",
-	"PxContactJoint",
 	"PxFixedJoint",
 	"PxPrismaticJoint",
 	"PxRevoluteJoint",
@@ -206,6 +209,8 @@ static const char* gAvoidedPhysXTypes[] =
     "PxBaseFlag::Enum",
     "PxFLIPMaterial",
     "PxMPMMaterial",
+    "PxFEMSoftBodyMaterial",
+    "PxSoftBody"
 };
 
 #include "PxPhysicsAPI.h"

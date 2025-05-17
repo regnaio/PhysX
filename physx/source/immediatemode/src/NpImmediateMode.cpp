@@ -22,7 +22,7 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
-// Copyright (c) 2008-2024 NVIDIA Corporation. All rights reserved.
+// Copyright (c) 2008-2025 NVIDIA Corporation. All rights reserved.
 // Copyright (c) 2004-2008 AGEIA Technologies, Inc. All rights reserved.
 // Copyright (c) 2001-2004 NovodeX AG. All rights reserved.  
 
@@ -38,6 +38,7 @@
 #include "../../lowleveldynamics/src/DyTGSContactPrep.h"
 #include "../../lowleveldynamics/src/DyTGS.h"
 #include "../../lowleveldynamics/src/DyConstraintPartition.h"
+#include "../../lowleveldynamics/src/DyPGS.h"
 #include "../../lowleveldynamics/shared/DyCpuGpuArticulation.h"
 #include "GuPersistentContactManifold.h"
 #include "NpConstraint.h"
@@ -103,7 +104,7 @@ namespace
 		PX_FORCE_INLINE	void							immSolveInternalConstraints(PxReal dt, PxReal invDt, PxReal elapsedTime, bool velocityIteration, bool isTGS)
 														{
 															// PT: TODO: revisit the TGS coeff (PX-4516)
-															FeatherstoneArticulation::solveInternalConstraints(dt, invDt, velocityIteration, isTGS, elapsedTime, isTGS ? 0.7f : DY_ARTICULATION_PGS_BIAS_COEFFICIENT, false);
+															FeatherstoneArticulation::solveInternalConstraints(dt, dt, invDt, velocityIteration, isTGS, elapsedTime, isTGS ? 0.7f : DY_ARTICULATION_PGS_BIAS_COEFFICIENT, false, false); //  pass correct flag value - PX-4744
 														}
 
 		PX_FORCE_INLINE	void							immComputeUnconstrainedVelocitiesTGS(PxReal dt, PxReal totalDt, PxReal invDt, PxReal /*invTotalDt*/, const PxVec3& gravity, PxReal invLengthScale)
@@ -627,9 +628,9 @@ void immediate::PxSolveConstraints(const PxConstraintBatchHeader* batchHeaders, 
 	PX_ASSERT(PxIsZero(solverBodies, nbSolverBodies)); //Ensure that solver body velocities have been zeroed before solving
 	PX_ASSERT((size_t(solverBodies) & 0xf) == 0);
 
-	const Dy::SolveBlockMethod* solveTable = Dy::getSolveBlockTable();
-	const Dy::SolveBlockMethod* solveConcludeTable = Dy::getSolverConcludeBlockTable();
-	const Dy::SolveWriteBackBlockMethod* solveWritebackTable = Dy::getSolveWritebackBlockTable();
+	const Dy::SolveBlockMethod* solveTable = Dy::gVTableSolveBlock;
+	const Dy::SolveBlockMethod* solveConcludeTable = Dy::gVTableSolveConcludeBlock;
+	const Dy::SolveWriteBackBlockMethod* solveWritebackTable = Dy::gVTableSolveWriteBackBlock;
 
 	Dy::SolverContext cache;
 	cache.solverBodyArray = NULL;
@@ -777,7 +778,7 @@ bool immediate::PxGenerateContacts(	const PxGeometry* const * geom0, const PxGeo
 
 			if(cache.isMultiManifold())
 			{
-				multiManifold.fromBuffer(reinterpret_cast<PxU8*>(&cache.getMultipleManifold()));
+				multiManifold.fromBuffer(cache.mCachedData);
 			}
 			else
 			{
@@ -861,26 +862,25 @@ void immArticulation::initJointCore(Dy::ArticulationJointCore& core, const PxArt
 {
 	core.init(inboundJoint.parentPose, inboundJoint.childPose);
 
-	core.jointDirtyFlag |= Dy::ArticulationJointCoreDirtyFlag::eMOTION | Dy::ArticulationJointCoreDirtyFlag::eFRAME;
+	core.jCalcUpdateFrames =  true;
 
 	const PxU32* binP = reinterpret_cast<const PxU32*>(inboundJoint.targetPos);
 	const PxU32* binV = reinterpret_cast<const PxU32*>(inboundJoint.targetVel);
 
 	for(PxU32 i=0; i<PxArticulationAxis::eCOUNT; i++)
 	{
-		core.initLimit(PxArticulationAxis::Enum(i), inboundJoint.limits[i]);
-		core.initDrive(PxArticulationAxis::Enum(i), inboundJoint.drives[i]);
+		core.setLimit(PxArticulationAxis::Enum(i), inboundJoint.limits[i]);
+		core.setDrive(PxArticulationAxis::Enum(i), inboundJoint.drives[i]);
+		core.setMaxJointVelocity(inboundJoint.maxJointVelocity[i]);
 
 		// See Sc::ArticulationJointCore::setTargetP and Sc::ArticulationJointCore::setTargetV
 		if(binP[i]!=0xffffffff)
 		{
 			core.targetP[i] = inboundJoint.targetPos[i];
-			core.jointDirtyFlag |= Dy::ArticulationJointCoreDirtyFlag::eTARGETPOSE;
 		}
 		if(binV[i]!=0xffffffff)
 		{
 			core.targetV[i] = inboundJoint.targetVel[i];
-			core.jointDirtyFlag |= Dy::ArticulationJointCoreDirtyFlag::eTARGETVELOCITY;
 		}
 		core.armature[i] = inboundJoint.armature[i];
 		core.jointPos[i] = inboundJoint.jointPos[i];
@@ -888,9 +888,8 @@ void immArticulation::initJointCore(Dy::ArticulationJointCore& core, const PxArt
 		core.motion[i] = PxU8(inboundJoint.motion[i]);
 	}
 
-	core.initFrictionCoefficient(inboundJoint.frictionCoefficient);
-	core.initMaxJointVelocity(inboundJoint.maxJointVelocity);
-	core.initJointType(inboundJoint.type);
+	core.setFrictionCoefficient(inboundJoint.frictionCoefficient);
+	core.setJointType(inboundJoint.type);
 }
 
 void immArticulation::allocate(const PxU32 nbLinks)
@@ -940,7 +939,6 @@ PxU32 immArticulation::addLink(const PxU32 parentIndex, const PxArticulationLink
 	// void BodySim::postActorFlagChange(PxU32 oldFlags, PxU32 newFlags)
 	bodyCore->disableGravity	= data.disableGravity;
 	link.bodyCore				= bodyCore;
-	link.children				= 0;
 	link.mPathToRootStartIndex	= 0;
 	link.mPathToRootCount		= 0;
 	link.mChildrenStartIndex	= 0xffffffff;
@@ -950,11 +948,9 @@ PxU32 immArticulation::addLink(const PxU32 parentIndex, const PxArticulationLink
 	if(!isRoot)
 	{
 		link.parent = parentIndex;
-		//link.pathToRoot = mLinks[parentIndex].pathToRoot | ArticulationBitField(1)<<index;
 		link.inboundJoint = &mArticulationJointCores[index];
 
 		ArticulationLink& parentLink = mLinks[parentIndex];
-		parentLink.children |= ArticulationBitField(1)<<index;
 
 		if(parentLink.mChildrenStartIndex == 0xffffffff)
 			parentLink.mChildrenStartIndex = index;
@@ -966,7 +962,6 @@ PxU32 immArticulation::addLink(const PxU32 parentIndex, const PxArticulationLink
 	else
 	{
 		link.parent = DY_ARTICULATION_LINK_NONE;
-		//link.pathToRoot = 1;
 		link.inboundJoint = NULL;
 	}
 	
@@ -1265,7 +1260,6 @@ bool immediate::PxGetJointData(const PxArticulationLinkHandle& link, PxArticulat
 	data.parentPose				= core.parentPose;
 	data.childPose				= core.childPose;
 	data.frictionCoefficient	= core.frictionCoefficient;
-	data.maxJointVelocity		= core.maxJointVelocity;
 	data.type					= PxArticulationJointType::Enum(core.jointType);
 	for(PxU32 i=0;i<PxArticulationAxis::eCOUNT;i++)
 	{
@@ -1277,6 +1271,7 @@ bool immediate::PxGetJointData(const PxArticulationLinkHandle& link, PxArticulat
 		data.armature[i]	= core.armature[i];
 		data.jointPos[i]	= core.jointPos[i];
 		data.jointVel[i]	= core.jointVel[i];
+		data.maxJointVelocity[i] = core.maxJointVelocity[i];
 	}
 	return true;
 }
@@ -1315,49 +1310,48 @@ bool immediate::PxSetJointData(const PxArticulationLinkHandle& link, const PxArt
 	// PT: joint type read by jcalc in computeMotionMatrix, called from ArticulationJointCore::setJointFrame
 	if(core.jointType!=PxU8(data.type))
 	{
-		core.initJointType(data.type);
+		core.setJointType(data.type);
 		immArt->mJCalcDirty = true;
 	}
 
 	// PT: TODO: do we need to recompute jcalc for these?
 	core.frictionCoefficient	= data.frictionCoefficient;
-	core.maxJointVelocity		= data.maxJointVelocity;
 
 	for(PxU32 i=0;i<PxArticulationAxis::eCOUNT;i++)
 	{
 		// PT: we don't need to recompute jcalc for these
 		core.limits[i]	= data.limits[i];
 		core.drives[i]	= data.drives[i];
+		core.maxJointVelocity[i] = data.maxJointVelocity[i];
 
 		core.jointPos[i] = data.jointPos[i];
 		core.jointVel[i] = data.jointVel[i];
 
-		// PT: joint motion read by jcalc in computeJointDof. We need to set Dy::ArticulationJointCoreDirtyFlag::eMOTION for this.
+		// PT: joint motion read by jcalc in computeJointDof. 
 		if(core.motion[i]!=data.motion[i])
 		{
-			core.setMotion(PxArticulationAxis::Enum(i), data.motion[i]);	// PT: also sets ArticulationJointCoreDirtyFlag::eMOTION
+			core.setMotion(PxArticulationAxis::Enum(i), data.motion[i]);	
 			immArt->mJCalcDirty = true;
 		}
 
-		// PT: targetP read by jcalc in setJointPoseDrive. We need to set ArticulationJointCoreDirtyFlag::eTARGETPOSE for this.
+		// PT: targetP read by jcalc
 		if(core.targetP[i] != data.targetPos[i])
 		{
-			core.setTargetP(PxArticulationAxis::Enum(i), data.targetPos[i]);	// PT: also sets ArticulationJointCoreDirtyFlag::eTARGETPOSE
+			core.setTargetP(PxArticulationAxis::Enum(i), data.targetPos[i]);
 			immArt->mJCalcDirty = true;
 		}
 
-		// PT: targetV read by jcalc in setJointVelocityDrive. We need to set ArticulationJointCoreDirtyFlag::eTARGETVELOCITY for this.
+		// PT: targetV read by jcalc
 		if(core.targetV[i] != data.targetVel[i])
 		{
-			core.setTargetV(PxArticulationAxis::Enum(i), data.targetVel[i]);	// PT: also sets ArticulationJointCoreDirtyFlag::eTARGETVELOCITY
+			core.setTargetV(PxArticulationAxis::Enum(i), data.targetVel[i]);
 			immArt->mJCalcDirty = true;
 		}
 
-		// PT: armature read by jcalc in setArmature. We need to set ArticulationJointCoreDirtyFlag::eARMATURE for this.
+
 		if(core.armature[i] != data.armature[i])
 		{
-			core.setArmature(PxArticulationAxis::Enum(i), data.armature[i]);	// PT: also sets ArticulationJointCoreDirtyFlag::eARMATURE
-			immArt->mJCalcDirty = true;
+			core.setArmature(PxArticulationAxis::Enum(i), data.armature[i]);
 		}
 	}
 

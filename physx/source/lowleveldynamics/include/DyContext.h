@@ -22,7 +22,7 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
-// Copyright (c) 2008-2024 NVIDIA Corporation. All rights reserved.
+// Copyright (c) 2008-2025 NVIDIA Corporation. All rights reserved.
 // Copyright (c) 2004-2008 AGEIA Technologies, Inc. All rights reserved.
 // Copyright (c) 2001-2004 NovodeX AG. All rights reserved.  
 
@@ -93,9 +93,6 @@ public:
 	PX_FORCE_INLINE PxU32					getSolverArticBatchSize()			const	{ return mSolverArticBatchSize; }
 	PX_FORCE_INLINE void					setSolverArticBatchSize(PxU32 f)			{ mSolverArticBatchSize = f;	}
 
-	PX_FORCE_INLINE PxFrictionType::Enum	getFrictionType()					const	{ return mFrictionType;	}
-	PX_FORCE_INLINE void					setFrictionType(PxFrictionType::Enum f) 	{ mFrictionType = f;	}
-
 	PX_FORCE_INLINE PxReal					getDt()								const	{ return mDt;		}
 	PX_FORCE_INLINE void					setDt(const PxReal dt)						{ mDt = dt;			}
 	// PT: TODO: we have a setDt function but it doesn't set the inverse dt, what's the story here?
@@ -158,11 +155,13 @@ public:
 	Each island is solved as an independent solver task chain. In addition, large islands may be solved using multiple parallel tasks.
 	Island solving is asynchronous. Once all islands have been solved, the continuation task will be called.
 	*/
-	virtual void						update(IG::SimpleIslandManager& simpleIslandManager, PxBaseTask* continuation, PxBaseTask* processLostTouchTask,
-										PxvNphaseImplementationContext* nPhaseContext, PxU32 maxPatchesPerCM, PxU32 maxArticulationLinks, PxReal dt, const PxVec3& gravity, PxBitMapPinned& changedHandleMap) = 0;
+	virtual void						update(	Cm::FlushPool& flushPool, PxBaseTask* continuation, PxBaseTask* postPartitioningTask, PxBaseTask* processLostTouchTask,
+												PxvNphaseImplementationContext* nPhaseContext, PxU32 maxPatchesPerCM, PxU32 maxArticulationLinks, PxReal dt, const PxVec3& gravity, PxBitMapPinned& changedHandleMap) = 0;
+	virtual void						updatePostPartitioning(PxBaseTask* /*processLostTouchTask*/,
+												PxvNphaseImplementationContext* /*nPhaseContext*/, PxU32 /*maxPatchesPerCM*/, PxU32 /*maxArticulationLinks*/, PxReal /*dt*/, const PxVec3& /*gravity*/, PxBitMapPinned& /*changedHandleMap*/)	{}
 
-	virtual void						processLostPatches(IG::SimpleIslandManager& /*simpleIslandManager*/, PxsContactManager** /*lostPatchManagers*/, PxU32 /*nbLostPatchManagers*/, PxsContactManagerOutputCounts* /*outCounts*/)	{}
-	virtual void						processFoundPatches(IG::SimpleIslandManager& /*simpleIslandManager*/, PxsContactManager** /*foundPatchManagers*/, PxU32 /*nbFoundPatchManagers*/, PxsContactManagerOutputCounts* /*outCounts*/) {}
+	virtual void						processPatches(	Cm::FlushPool& /*flushPool*/, PxBaseTask* /*continuation*/,
+														PxsContactManager** /*lostFoundPatchManagers*/, PxU32 /*nbLostFoundPatchManagers*/, PxsContactManagerOutputCounts* /*outCounts*/)	{}
 
 	/**
 	\brief This method copy gpu solver body data to cpu body core
@@ -185,7 +184,7 @@ public:
 
 protected:
 
-	Context(IG::SimpleIslandManager* islandManager, PxVirtualAllocatorCallback* allocatorCallback,
+	Context(IG::SimpleIslandManager& islandManager, PxVirtualAllocatorCallback* allocatorCallback,
 			PxvSimStats& simStats, bool enableStabilization, bool useEnhancedDeterminism,
 			PxReal maxBiasCoefficient, PxReal lengthScale, PxU64 contextID, bool isResidualReportingEnabled) :
 		mThresholdStream			(NULL),
@@ -223,7 +222,7 @@ protected:
 	ThresholdStream*			mForceChangedThresholdStream;
 	ThresholdTable				mThresholdTable;
 
-	IG::SimpleIslandManager*	mIslandManager;
+	IG::SimpleIslandManager&	mIslandManager;
 	PxsSimulationController*	mSimulationController;
 	/**
 	\brief Time-step.
@@ -279,11 +278,6 @@ protected:
 	\brief The minimum number of articulations required to generate a solver task chain.
 	*/
 	PxU32						mSolverArticBatchSize;
-
-	/**
-	\brief The current friction model being used
-	*/
-	PxFrictionType::Enum		mFrictionType;
 
 	/**
 	\brief Structure to encapsulate contact stream allocations. Used by GPU solver to reference pre-allocated pinned host memory
@@ -355,12 +349,12 @@ protected:
 
 Context* createDynamicsContext(	PxcNpMemBlockPool* memBlockPool, PxcScratchAllocator& scratchAllocator, Cm::FlushPool& taskPool,
 								PxvSimStats& simStats, PxTaskManager* taskManager, PxVirtualAllocatorCallback* allocatorCallback, PxsMaterialManager* materialManager,
-								IG::SimpleIslandManager* islandManager, PxU64 contextID, bool enableStabilization, bool useEnhancedDeterminism,
+								IG::SimpleIslandManager& islandManager, PxU64 contextID, bool enableStabilization, bool useEnhancedDeterminism,
 								PxReal maxBiasCoefficient, bool frictionEveryIteration, PxReal lengthScale, bool isResidualReportingEnabled);
 
 Context* createTGSDynamicsContext(	PxcNpMemBlockPool* memBlockPool, PxcScratchAllocator& scratchAllocator, Cm::FlushPool& taskPool,
 									PxvSimStats& simStats, PxTaskManager* taskManager, PxVirtualAllocatorCallback* allocatorCallback, PxsMaterialManager* materialManager,
-									IG::SimpleIslandManager* islandManager, PxU64 contextID, bool enableStabilization, bool useEnhancedDeterminism, PxReal lengthScale, 
+									IG::SimpleIslandManager& islandManager, PxU64 contextID, bool enableStabilization, bool useEnhancedDeterminism, PxReal lengthScale, 
 									bool externalForcesEveryTgsIterationEnabled, bool isResidualReportingEnabled);
 }
 

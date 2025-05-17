@@ -22,7 +22,7 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
-// Copyright (c) 2008-2024 NVIDIA Corporation. All rights reserved.
+// Copyright (c) 2008-2025 NVIDIA Corporation. All rights reserved.
 // Copyright (c) 2004-2008 AGEIA Technologies, Inc. All rights reserved.
 // Copyright (c) 2001-2004 NovodeX AG. All rights reserved.  
 
@@ -47,7 +47,6 @@ public:
 						void					resolveReferences(PxDeserializationContext& context);
 	    virtual	        void					requiresObjects(PxProcessPxBaseCallback& c);
 		static			NpAggregate*			createObject(PxU8*& address, PxDeserializationContext& context);
-		static			void					getBinaryMetaData(PxOutputStream& stream);
 //~PX_SERIALIZATION
 												NpAggregate(PxU32 maxActors, PxU32 maxShapes, PxAggregateFilterHint filterHint);
 		virtual									~NpAggregate();
@@ -64,6 +63,8 @@ public:
 		virtual			PxU32					getActors(PxActor** userBuffer, PxU32 bufferSize, PxU32 startIndex) const	PX_OVERRIDE PX_FINAL;
 		virtual			PxScene*				getScene()	PX_OVERRIDE PX_FINAL;
 		virtual			bool					getSelfCollision()	const	PX_OVERRIDE PX_FINAL;
+		virtual			bool					setEnvironmentID(PxU32 envID)	PX_OVERRIDE PX_FINAL;
+		virtual			PxU32					getEnvironmentID()		const	PX_OVERRIDE PX_FINAL;
 		//~PxAggregate
 
 		PX_FORCE_INLINE	PxU32					getMaxNbShapesFast()	const	{ return mMaxNbShapes;	}
@@ -74,6 +75,7 @@ public:
 
 		PX_FORCE_INLINE	bool					getSelfCollideFast()	const	{ return PxGetAggregateSelfCollisionBit(mFilterHint)!=0;	}
 		PX_FORCE_INLINE	PxAggregateFilterHint	getFilterHint()			const	{ return mFilterHint;	}
+		PX_FORCE_INLINE	PxU32					getEnvID()				const	{ return mEnvID;		}
 
 						void					scRemoveActor(NpActor& actor, bool reinsert);
 						bool					removeActorAndReinsert(PxActor& actor, bool reinsert);
@@ -87,6 +89,7 @@ private:
 						PxU32					mMaxNbActors;
 						PxU32					mMaxNbShapes;
 						PxAggregateFilterHint	mFilterHint;
+						PxU32					mEnvID;
 						PxU32					mNbActors;
 						PxU32					mNbShapes;
 						PxActor**				mActors;

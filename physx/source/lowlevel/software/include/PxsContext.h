@@ -22,7 +22,7 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
-// Copyright (c) 2008-2024 NVIDIA Corporation. All rights reserved.
+// Copyright (c) 2008-2025 NVIDIA Corporation. All rights reserved.
 // Copyright (c) 2004-2008 AGEIA Technologies, Inc. All rights reserved.
 // Copyright (c) 2001-2004 NovodeX AG. All rights reserved.  
 
@@ -30,6 +30,7 @@
 #define PXS_CONTEXT_H
 
 #include "foundation/PxPinnedArray.h"
+#include "foundation/PxPool.h"
 #include "PxVisualizationParameter.h"
 #include "PxSceneDesc.h"
 
@@ -51,16 +52,13 @@
 
 #include "PxsTransformCache.h"
 #include "GuPersistentContactManifold.h"
+#include "PxcNpThreadContext.h"
 
+namespace physx
+{
 #if PX_SUPPORT_GPU_PHYSX
-namespace physx
-{
-	class PxCudaContextManager;
-}
+class PxCudaContextManager;
 #endif
-
-namespace physx
-{
 class PxsRigidBody;
 struct PxcConstraintBlock;
 class PxsMaterialManager;
@@ -75,7 +73,6 @@ namespace Cm
 
 namespace IG
 {
-	class SimpleIslandManager;
 	typedef PxU32 EdgeIndex;
 }
 
@@ -124,11 +121,11 @@ public:
 					void						resetThreadContexts();
 
 	// Manager status change
-					bool						getManagerTouchEventCount(int* newTouch, int* lostTouch, int* ccdTouch) const;
-					bool						fillManagerTouchEvents(
-													PxvContactManagerTouchEvent* newTouch, PxI32& newTouchCount,
-													PxvContactManagerTouchEvent* lostTouch, PxI32& lostTouchCount,
-													PxvContactManagerTouchEvent* ccdTouch, PxI32& ccdTouchCount);
+					bool						getManagerTouchEventCount(PxU32* newTouch, PxU32* lostTouch, PxU32* ccdTouch) const;
+					void						fillManagerTouchEvents(
+													PxvContactManagerTouchEvent* newTouch, PxU32& newTouchCount,
+													PxvContactManagerTouchEvent* lostTouch, PxU32& lostTouchCount,
+													PxvContactManagerTouchEvent* ccdTouch, PxU32& ccdTouchCount);
 
 					void						beginUpdate();
 
@@ -204,9 +201,9 @@ public:
 
 	PX_FORCE_INLINE	void						clearManagerTouchEvents();
 
-	PX_FORCE_INLINE Cm::PoolList<PxsContactManager, PxsContext>& getContactManagerPool()
+	PX_FORCE_INLINE Cm::PoolList<PxsContactManager>& getContactManagerPool()
 	{
-		return this->mContactManagerPool;
+		return mContactManagerPool;
 	}
 
 	PX_FORCE_INLINE void setActiveContactManager(const PxsContactManager* manager, PxIntBool useCCD)
@@ -240,9 +237,9 @@ private:
 												mNpThreadContextPool;
 
 	// Contact managers
-	Cm::PoolList<PxsContactManager, PxsContext>		mContactManagerPool;
-	PxPool<Gu::LargePersistentContactManifold>		mManifoldPool;
-	PxPool<Gu::SpherePersistentContactManifold>		mSphereManifoldPool;
+	Cm::PoolList<PxsContactManager>				mContactManagerPool;
+	PxPool<Gu::LargePersistentContactManifold>	mManifoldPool;
+	PxPool<Gu::SpherePersistentContactManifold>	mSphereManifoldPool;
 	
 //	PxBitMap				mActiveContactManager;
 	PxBitMap				mActiveContactManagersWithCCD; //KS - adding to filter any pairs that had a touch

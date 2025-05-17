@@ -22,17 +22,15 @@
 ## (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 ## OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ##
-## Copyright (c) 2008-2024 NVIDIA Corporation. All rights reserved.
+## Copyright (c) 2008-2025 NVIDIA Corporation. All rights reserved.
 
 #
 # Build LowLevelAABB
 #
 
 SET(LOWLEVELAABB_PLATFORM_INCLUDES
-	${PHYSX_SOURCE_DIR}/Common/src/linux
-	${PHYSX_SOURCE_DIR}/LowLevelAABB/linux/include
-	${PHYSX_SOURCE_DIR}/GpuBroadPhase/include
-	${PHYSX_SOURCE_DIR}/GpuBroadPhase/src
+	${PHYSX_SOURCE_DIR}/common/src/linux
+	${PHYSX_SOURCE_DIR}/lowlevelaabb/linux/include
 )
 
 

@@ -22,7 +22,7 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
-// Copyright (c) 2008-2024 NVIDIA Corporation. All rights reserved.
+// Copyright (c) 2008-2025 NVIDIA Corporation. All rights reserved.
 // Copyright (c) 2004-2008 AGEIA Technologies, Inc. All rights reserved.
 // Copyright (c) 2001-2004 NovodeX AG. All rights reserved.  
 
@@ -109,7 +109,9 @@ namespace Bp
 	{
 												PX_NOCOPY(BoundsArray)
 	public:
-												BoundsArray(PxVirtualAllocator& allocator) : mBounds(allocator)	{}
+												BoundsArray(PxVirtualAllocator& allocator) : mBounds(allocator), mHasAnythingChanged(true)	{} //needs to be set explicitly for PxgBounds first copy
+
+		virtual									~BoundsArray(){}
 
 		PX_FORCE_INLINE	void					initEntry(PxU32 index)
 												{
@@ -123,13 +125,14 @@ namespace Bp
 													}
 												}
 
-		PX_FORCE_INLINE void					updateBounds(const PxTransform& transform, const PxGeometry& geom, PxU32 index)
+		virtual void							updateBounds(const PxTransform& transform, const PxGeometry& geom, PxU32 index, PxU32 /*indexFrom*/)
 												{
 													Gu::computeBounds(mBounds[index], geom, transform, 0.0f, 1.0f);
 													mHasAnythingChanged = true;
 												}
 
-		PX_FORCE_INLINE	void					setBounds(const PxBounds3& bounds, PxU32 index)
+
+		virtual void							setBounds(const PxBounds3& bounds, PxU32 index)
 												{
 	//												PX_CHECK_AND_RETURN(bounds.isValid() && !bounds.isEmpty(), "BoundsArray::setBounds - illegal bounds\n");
 													mBounds[index] = bounds;
@@ -140,7 +143,7 @@ namespace Bp
 		PX_FORCE_INLINE PxBounds3*				begin()							{ return mBounds.begin();		}
 		PX_FORCE_INLINE PxBoundsArrayPinned&	getBounds()						{ return mBounds;				}
 		PX_FORCE_INLINE	const PxBounds3&		getBounds(PxU32 index)	const	{ return mBounds[index];		}
-		PX_FORCE_INLINE PxU32					getCapacity()			const	{ return mBounds.size();		}
+		PX_FORCE_INLINE PxU32					size()					const	{ return mBounds.size();		}
 		PX_FORCE_INLINE	bool					hasChanged()			const	{ return mHasAnythingChanged;	}
 		PX_FORCE_INLINE	void					resetChangedState()				{ mHasAnythingChanged = false;	}
 		PX_FORCE_INLINE	void					setChangedState()				{ mHasAnythingChanged = true;	}
@@ -156,7 +159,7 @@ namespace Bp
 													}
 													mHasAnythingChanged = true;
 												}
-	private:
+	protected:
 						PxBoundsArrayPinned		mBounds;
 						bool					mHasAnythingChanged;
 	};
@@ -181,10 +184,10 @@ namespace Bp
 
 		virtual			void					destroy() = 0;
 
-		virtual			AggregateHandle			createAggregate(BoundsIndex index, Bp::FilterGroup::Enum group, void* userData, PxU32 maxNumShapes, PxAggregateFilterHint filterHint) = 0;
+		virtual			AggregateHandle			createAggregate(BoundsIndex index, Bp::FilterGroup::Enum group, void* userData, PxU32 maxNumShapes, PxAggregateFilterHint filterHint, PxU32 envID) = 0;
 		virtual			bool					destroyAggregate(BoundsIndex& index, Bp::FilterGroup::Enum& group, AggregateHandle aggregateHandle) = 0;
 
-		virtual			bool					addBounds(BoundsIndex index, PxReal contactDistance, Bp::FilterGroup::Enum group, void* userdata, AggregateHandle aggregateHandle, ElementType::Enum volumeType) = 0;
+		virtual			bool					addBounds(BoundsIndex index, PxReal contactDistance, Bp::FilterGroup::Enum group, void* userdata, AggregateHandle aggregateHandle, ElementType::Enum volumeType, PxU32 envID) = 0;
 		virtual			bool					removeBounds(BoundsIndex index) = 0;
 
 						void					reserveSpaceForBounds(BoundsIndex index);
@@ -295,6 +298,7 @@ namespace Bp
 		//ML: we create mGroups and mContactDistance in the AABBManager constructor. PxArray will take PxVirtualAllocator as a parameter. Therefore, if GPU BP is using,
 		//we will passed a pinned host memory allocator, otherwise, we will just pass a normal allocator.
 						GroupsArrayPinned		mGroups;				// NOTE: we stick Bp::FilterGroup::eINVALID in this slot to indicate that the entry is invalid (removed or never inserted.)
+						PxInt32ArrayPinned		mEnvIDs;				// PT: should ideally be in the GPU class
 						PxFloatArrayPinned& 	mContactDistance;
 						VolumeDataArrayPinned	mVolumeData;
 						BpFilter				mFilters;
@@ -324,6 +328,9 @@ namespace Bp
 													mGroups[index] = Bp::FilterGroup::eINVALID;
 													mContactDistance.begin()[index] = 0.0f;
 													mVolumeData[index].reset();
+
+													if(index<mEnvIDs.size())
+														mEnvIDs[index] = PX_INVALID_U32;
 												}
 
 		// PT: TODO: remove confusion between BoundsIndex and ShapeHandle here!
@@ -348,7 +355,7 @@ namespace Bp
 	PX_CATCH_UNDEFINED_ENABLE_SIM_STATS
 #endif
 
-#ifdef BP_USE_AGGREGATE_GROUP_TAIL
+#if BP_USE_AGGREGATE_GROUP_TAIL
 		// PT: TODO: even in the 3.4 trunk this stuff is a clumsy mess: groups are "BpHandle" suddenly passed
 		// to BroadPhaseUpdateData as "ShapeHandle".
 		//Free aggregate group ids.
@@ -358,7 +365,7 @@ namespace Bp
 						PxU64					mContextID;
 						bool					mOriginShifted;
 
-#ifdef BP_USE_AGGREGATE_GROUP_TAIL
+#if BP_USE_AGGREGATE_GROUP_TAIL
 		PX_FORCE_INLINE void					releaseAggregateGroup(const Bp::FilterGroup::Enum group)
 												{
 													PX_ASSERT(group != Bp::FilterGroup::eINVALID);

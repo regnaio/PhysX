@@ -22,7 +22,7 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
-// Copyright (c) 2008-2024 NVIDIA Corporation. All rights reserved.
+// Copyright (c) 2008-2025 NVIDIA Corporation. All rights reserved.
 // Copyright (c) 2004-2008 AGEIA Technologies, Inc. All rights reserved.
 // Copyright (c) 2001-2004 NovodeX AG. All rights reserved.  
 
@@ -111,9 +111,9 @@ struct PxD6Drive
 		eX			= 0,	//!< drive along the X-axis
 		eY			= 1,	//!< drive along the Y-axis
 		eZ			= 2,	//!< drive along the Z-axis
-		eSWING		= 3,	//!< drive of displacement from the X-axis
-		eTWIST		= 4,	//!< drive of the displacement around the X-axis
-		eSLERP		= 5,	//!< drive of all three angular degrees along a SLERP-path
+		eSWING		= 3,	//!< rotational drive around the Y- and Z-axis
+		eTWIST		= 4,	//!< rotational drive around the X-axis
+		eSLERP		= 5,	//!< drive of all three angular degrees along a SLERP-path (note: takes precedence over eSWING/eTWIST)
 		eCOUNT		= 6
 	};
 };
@@ -127,7 +127,20 @@ struct PxD6JointDriveFlag
 {
 	enum Enum
 	{
-		eACCELERATION	= 1	//!< drive spring is for the acceleration at the joint (rather than the force) 
+		eACCELERATION	= (1 << 0),	//!< drive spring is for the acceleration at the joint (rather than the force) 
+
+		/**
+		\brief Add drive force/torque to the joint force/torque total.
+
+		If this flag is raised, the force/torque value from this drive constraint will be accumulated
+		in the force/torque total that is reported for the underlying PxConstraint object. Note that
+		because the force/torque total changes, the joint break behavior will change too.
+
+		<b>Default:</b> False
+
+		\see PxConstraint::getForce()
+		*/
+		eOUTPUT_FORCE	= (1 << 1)
 	};
 };
 typedef PxFlags<PxD6JointDriveFlag::Enum, PxU32> PxD6JointDriveFlags;
@@ -397,7 +410,7 @@ public:
 
 	\see getDrive() PxD6JointDrive
 
-	<b>Default</b> The default drive spring and damping values are zero, the force limit is zero, and no flags are set.
+	<b>Default</b> The default drive spring and damping values are zero, the force limit is PX_MAX_F32, and no flags are set.
 	*/
 	virtual void				setDrive(PxD6Drive::Enum index, const PxD6JointDrive& drive)	= 0;
 
@@ -459,7 +472,7 @@ public:
 	/**
 	\brief Returns string name of PxD6Joint, used for serialization
 	*/
-	virtual	const char*			getConcreteTypeName() const { return "PxD6Joint"; }
+	virtual	const char*			getConcreteTypeName() const	PX_OVERRIDE	{ return "PxD6Joint"; }
 
 protected:
 
@@ -481,6 +494,20 @@ protected:
 	virtual	bool				isKindOf(const char* name) const { PX_IS_KIND_OF(name, "PxD6Joint", PxJoint); }
 
 	//~serialization
+
+public:
+	/**
+	\brief Returns the GPU D6 joint index.
+
+	\note Only use in combination with enabled GPU dynamics and enabled direct GPU API
+	      (see #PxSceneFlag::eENABLE_GPU_DYNAMICS, #PxSceneFlag::eENABLE_DIRECT_GPU_API,
+		  #PxBroadPhaseType::eGPU)
+
+	\return The GPU index, or PX_INVALID_D6_JOINT_GPU_INDEX if the joint is not part of a PxScene.
+
+	\see PxDirectGPUAPI::getD6JointData()
+	*/
+	virtual PxD6JointGPUIndex getGPUIndex() const = 0;
 };
 
 #if !PX_DOXYGEN

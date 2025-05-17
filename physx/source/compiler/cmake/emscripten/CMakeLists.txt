@@ -22,7 +22,7 @@
 ## (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 ## OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ##
-## Copyright (c) 2008-2024 NVIDIA Corporation. All rights reserved.
+## Copyright (c) 2008-2025 NVIDIA Corporation. All rights reserved.
 
 STRING(TOLOWER "${CMAKE_BUILD_TYPE}" CMAKE_BUILD_TYPE_LOWERCASE)
 
@@ -86,6 +86,10 @@ SET(CLANG_WARNINGS "-ferror-limit=0 -Wall -Wextra -Werror -Wstrict-aliasing=2 -W
     -Wno-unused-variable \
     -Wno-switch-default \
     -Wno-invalid-offsetof \
+    -Wno-inconsistent-missing-override \
+    -Wno-inconsistent-missing-destructor-override \
+    -Wno-unused-function \
+    -Wno-inconsistent-missing-override \
 ")
 
 # Set to true to enable multi-threading - works but is difficult to use
@@ -201,7 +205,6 @@ ELSE()
 	INCLUDE(PhysXCooking.cmake)
 	INCLUDE(PhysXExtensions.cmake)
 	INCLUDE(PhysXVehicle.cmake)
-	INCLUDE(PhysXVehicle2.cmake)
 	INCLUDE(SceneQuery.cmake)
 	INCLUDE(SimulationController.cmake)
 	INCLUDE(PhysXPvdSDK.cmake)
@@ -214,7 +217,6 @@ ELSE()
 	SET_PROPERTY(TARGET PhysXCommon PROPERTY FOLDER "PhysX SDK")
 	SET_PROPERTY(TARGET PhysXCooking PROPERTY FOLDER "PhysX SDK")
 	SET_PROPERTY(TARGET PhysXExtensions PROPERTY FOLDER "PhysX SDK")
-	SET_PROPERTY(TARGET PhysXVehicle PROPERTY FOLDER "PhysX SDK")
 	SET_PROPERTY(TARGET PhysXVehicle2 PROPERTY FOLDER "PhysX SDK")
 	SET_PROPERTY(TARGET LowLevel PROPERTY FOLDER "PhysX SDK")
 	SET_PROPERTY(TARGET LowLevelAABB PROPERTY FOLDER "PhysX SDK")
@@ -226,7 +228,7 @@ ELSE()
 	SET_PROPERTY(TARGET PhysXFoundation PROPERTY FOLDER "PhysX SDK")
 
 
-	SET(PHYSXDISTRO_LIBS PhysXFoundation PhysX PhysXCharacterKinematic PhysXPvdSDK PhysXCommon PhysXCooking PhysXExtensions PhysXVehicle PhysXVehicle2)
+	SET(PHYSXDISTRO_LIBS PhysXFoundation PhysX PhysXCharacterKinematic PhysXPvdSDK PhysXCommon PhysXCooking PhysXExtensions PhysXVehicle2)
 
 
 	INSTALL(

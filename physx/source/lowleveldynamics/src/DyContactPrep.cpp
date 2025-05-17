@@ -22,25 +22,21 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
-// Copyright (c) 2008-2024 NVIDIA Corporation. All rights reserved.
+// Copyright (c) 2008-2025 NVIDIA Corporation. All rights reserved.
 // Copyright (c) 2004-2008 AGEIA Technologies, Inc. All rights reserved.
 // Copyright (c) 2001-2004 NovodeX AG. All rights reserved.  
      
 #include "foundation/PxPreprocessor.h"
 #include "foundation/PxVecMath.h"
-#include "PxcNpWorkUnit.h"
 #include "DyThreadContext.h"
 #include "PxcNpContactPrepShared.h"
 #include "DyConstraintPrep.h"
 #include "DyAllocator.h"
 
 using namespace physx;
-using namespace Gu;
 
-#include "PxsMaterialManager.h"
 #include "DyContactPrepShared.h"
 
-#include "DyCpuGpu1dConstraint.h"
 #include "DySolverConstraint1DStep.h"
 
 using namespace aos;
@@ -49,13 +45,6 @@ namespace physx
 {
 namespace Dy
 {
-
-PxcCreateFinalizeSolverContactMethod createFinalizeMethods[3] =
-{
-	createFinalizeSolverContacts,
-	createFinalizeSolverContactsCoulomb1D,
-	createFinalizeSolverContactsCoulomb2D
-};
 
 static void setupFinalizeSolverConstraints(
 							const PxSolverContactDesc& contactDesc,
@@ -212,7 +201,7 @@ static void setupFinalizeSolverConstraints(
 		PxMemZero(forceBuffers, sizeof(PxF32) * contactCount);
 		ptr += ((contactCount + 3) & (~3)) * sizeof(PxF32); // jump to next 16-byte boundary
 		
-		const PxReal frictionCoefficient = (contactBase0->materialFlags & PxMaterialFlag::eIMPROVED_PATCH_FRICTION && frictionPatch.anchorCount == 2) ? 0.5f : 1.f;
+		const PxReal frictionCoefficient = (frictionPatch.anchorCount == 2) ? 0.5f : 1.f;
 
 		const PxReal staticFriction = contactBase0->staticFriction * frictionCoefficient;
 		const PxReal dynamicFriction = contactBase0->dynamicFriction* frictionCoefficient;

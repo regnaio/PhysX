@@ -602,10 +602,6 @@ interface PxArticulationReducedCoordinate {
     float getWakeCounter();
     void wakeUp();
     void putToSleep();
-    void setMaxCOMLinearVelocity(float maxLinerVelocity);
-    float getMaxCOMLinearVelocity();
-    void setMaxCOMAngularVelocity(float maxAngularVelocity);
-    float getMaxCOMAngularVelocity();
     PxArticulationLink createLink(PxArticulationLink parent, [Const, Ref] PxTransform pose);
     unsigned long getNbLinks();
     unsigned long getNbShapes();
@@ -624,12 +620,17 @@ interface PxArticulationReducedCoordinate {
     void copyInternalStateToCache([Ref] PxArticulationCache cache, [Const, Ref] PxArticulationCacheFlags flags);
     void commonInit();
     void computeGeneralizedGravityForce([Ref] PxArticulationCache cache);
+    void computeGravityCompensation([Ref] PxArticulationCache cache);
     void computeCoriolisAndCentrifugalForce([Ref] PxArticulationCache cache);
+    void computeCoriolisCompensation([Ref] PxArticulationCache cache);
     void computeGeneralizedExternalForce([Ref] PxArticulationCache cache);
     void computeJointAcceleration([Ref] PxArticulationCache cache);
     void computeJointForce([Ref] PxArticulationCache cache);
     void computeCoefficientMatrix([Ref] PxArticulationCache cache);
     void computeGeneralizedMassMatrix([Ref] PxArticulationCache cache);
+    void computeMassMatrix([Ref] PxArticulationCache cache);
+    [Value] PxVec3 computeArticulationCOM(boolean rootFrame);
+    void computeCentroidalMomentumMatrix([Ref] PxArticulationCache cache);
     void addLoopJoint(PxConstraint joint);
     void removeLoopJoint(PxConstraint joint);
     unsigned long getNbLoopJoints();
@@ -641,7 +642,7 @@ interface PxArticulationReducedCoordinate {
     void setRootAngularVelocity([Const, Ref] PxVec3 angularVelocity, optional boolean autowake);
     [Value] PxVec3 getRootAngularVelocity();
     [Value] PxSpatialVelocity getLinkAcceleration(unsigned long linkId);
-    unsigned long getGpuArticulationIndex();
+    unsigned long getGPUIndex();
     PxArticulationSpatialTendon createSpatialTendon();
     PxArticulationFixedTendon createFixedTendon();
     unsigned long getNbSpatialTendons();
@@ -2703,7 +2704,7 @@ interface PxTetrahedronMeshDesc {
     void PxTetrahedronMeshDesc();
     void PxTetrahedronMeshDesc([Ref] PxArray_PxVec3 meshVertices, [Ref] PxArray_PxU32 meshTetIndices, optional PxTetrahedronMeshFormatEnum meshFormat, optional unsigned short numberOfTetsPerHexElement);
     boolean isValid();
-    [Value] attribute PxTypedStridedData_PxU16 materialIndices;
+    [Value] attribute PxTypedBoundedData_PxU16 materialIndices;
     [Value] attribute PxBoundedData points;
     [Value] attribute PxBoundedData tetrahedrons;
     [Value] attribute PxMeshFlags flags;
@@ -2833,7 +2834,7 @@ interface PxTriangleMeshAnalysisResults {
 [Prefix="physx::"]
 interface PxTriangleMeshDesc {
     void PxTriangleMeshDesc();
-    [Value] attribute PxU16StridedData materialIndices;
+    [Const, Value] attribute PxTypedBoundedData_PxU16Const materialIndices;
 };
 PxTriangleMeshDesc implements PxSimpleTriangleMesh;
 
@@ -2873,9 +2874,14 @@ interface PxTriggerPairFlags {
     void clear(PxTriggerPairFlagEnum flag);
 };
 
-interface PxTypedStridedData_PxU16 {
+interface PxTypedBoundedData_PxU16 {
     attribute unsigned long stride;
-    [Value] attribute PxU16ConstPtr data;
+    [Value] attribute PxU16Ptr data;
+};
+
+interface PxTypedBoundedData_PxU16Const {
+    attribute unsigned long stride;
+    [Const, Value] attribute PxU16ConstPtr data;
 };
 
 interface PxU16ConstPtr {
@@ -2884,11 +2890,6 @@ interface PxU16ConstPtr {
 interface PxU16Ptr {
 };
 PxU16Ptr implements PxU16ConstPtr;
-
-interface PxU16StridedData {
-    attribute unsigned long stride;
-    [Const, Value] attribute PxU16ConstPtr data;
-};
 
 interface PxU32ConstPtr {
 };
@@ -3682,9 +3683,6 @@ interface PxVehicleWheelRigidBody1dState {
     attribute float rotationAngle;
 };
 
-interface PxVehicleWheelsPtr {
-};
-
 [JSImplementation="SimplePvdTransport"]
 interface SimplPvdTransportImpl {
     void SimplPvdTransportImpl();
@@ -3879,10 +3877,10 @@ enum PxActorTypeEnum {
     "PxActorTypeEnum::eRIGID_STATIC",
     "PxActorTypeEnum::eRIGID_DYNAMIC",
     "PxActorTypeEnum::eARTICULATION_LINK",
+    "PxActorTypeEnum::eDEFORMABLE_SURFACE",
+    "PxActorTypeEnum::eDEFORMABLE_VOLUME",
     "PxActorTypeEnum::eSOFTBODY",
-    "PxActorTypeEnum::eFEMCLOTH",
-    "PxActorTypeEnum::ePBD_PARTICLESYSTEM",
-    "PxActorTypeEnum::eHAIRSYSTEM"
+    "PxActorTypeEnum::ePBD_PARTICLESYSTEM"
 };
 
 enum PxActorTypeFlagEnum {
@@ -3917,8 +3915,6 @@ enum PxArticulationCacheFlagEnum {
 enum PxArticulationDriveTypeEnum {
     "PxArticulationDriveTypeEnum::eFORCE",
     "PxArticulationDriveTypeEnum::eACCELERATION",
-    "PxArticulationDriveTypeEnum::eTARGET",
-    "PxArticulationDriveTypeEnum::eVELOCITY",
     "PxArticulationDriveTypeEnum::eNONE"
 };
 
@@ -4035,7 +4031,6 @@ enum PxConvexFlagEnum {
     "PxConvexFlagEnum::eDISABLE_MESH_VALIDATION",
     "PxConvexFlagEnum::ePLANE_SHIFTING",
     "PxConvexFlagEnum::eFAST_INERTIA_COMPUTATION",
-    "PxConvexFlagEnum::eGPU_COMPATIBLE",
     "PxConvexFlagEnum::eSHIFT_VERTICES"
 };
 
@@ -4138,8 +4133,6 @@ enum PxForceModeEnum {
 
 enum PxFrictionTypeEnum {
     "PxFrictionTypeEnum::ePATCH",
-    "PxFrictionTypeEnum::eONE_DIRECTIONAL",
-    "PxFrictionTypeEnum::eTWO_DIRECTIONAL",
     "PxFrictionTypeEnum::eFRICTION_COUNT"
 };
 
@@ -4169,7 +4162,6 @@ enum PxHitFlagEnum {
     "PxHitFlagEnum::eASSUME_NO_INITIAL_OVERLAP",
     "PxHitFlagEnum::eANY_HIT",
     "PxHitFlagEnum::eMESH_MULTIPLE",
-    "PxHitFlagEnum::eMESH_ANY",
     "PxHitFlagEnum::eMESH_BOTH_SIDES",
     "PxHitFlagEnum::ePRECISE_SWEEP",
     "PxHitFlagEnum::eMTD",
@@ -4190,7 +4182,7 @@ enum PxJointActorIndexEnum {
 enum PxMaterialFlagEnum {
     "PxMaterialFlagEnum::eDISABLE_FRICTION",
     "PxMaterialFlagEnum::eDISABLE_STRONG_FRICTION",
-    "PxMaterialFlagEnum::eIMPROVED_PATCH_FRICTION"
+    "PxMaterialFlagEnum::eCOMPLIANT_ACCELERATION_SPRING"
 };
 
 enum PxMeshCookingHintEnum {

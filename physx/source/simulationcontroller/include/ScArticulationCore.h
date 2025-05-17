@@ -22,7 +22,7 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
-// Copyright (c) 2008-2024 NVIDIA Corporation. All rights reserved.
+// Copyright (c) 2008-2025 NVIDIA Corporation. All rights reserved.
 // Copyright (c) 2004-2008 AGEIA Technologies, Inc. All rights reserved.
 // Copyright (c) 2001-2004 NovodeX AG. All rights reserved.  
 
@@ -49,7 +49,6 @@ namespace Sc
 // PX_SERIALIZATION
 		public:
 													ArticulationCore(const PxEMPTY) : mSim(NULL), mCore(PxEmpty) {}
-		static		void							getBinaryMetaData(PxOutputStream& stream);
 //~PX_SERIALIZATION
 													ArticulationCore();
 													~ArticulationCore();
@@ -69,12 +68,6 @@ namespace Sc
 		PX_FORCE_INLINE	PxReal						getWakeCounter()					const	{ return mCore.wakeCounter;				}
 		PX_FORCE_INLINE	void						setWakeCounterInternal(const PxReal v)		{ mCore.wakeCounter = v;				}
 						void						setWakeCounter(const PxReal v);
-
-		PX_FORCE_INLINE	PxReal						getMaxLinearVelocity()				const	{ return mCore.maxLinearVelocity;		}
-						void						setMaxLinearVelocity(const PxReal max);
-
-		PX_FORCE_INLINE	PxReal						getMaxAngularVelocity()				const	{ return mCore.maxAngularVelocity;		}
-						void						setMaxAngularVelocity(const PxReal max);
 
 						bool						isSleeping() const;
 						void						wakeUp(PxReal wakeCounter);
@@ -105,9 +98,9 @@ namespace Sc
 
 						void						commonInit() const;
 
-						void						computeGeneralizedGravityForce(PxArticulationCache& cache) const;
+						void						computeGeneralizedGravityForce(PxArticulationCache& cache, const bool rootMotion) const;
 
-						void						computeCoriolisAndCentrifugalForce(PxArticulationCache& cache) const;
+						void						computeCoriolisAndCentrifugalForce(PxArticulationCache& cache, const bool rootMotion) const;
 
 						void						computeGeneralizedExternalForce(PxArticulationCache& cache) const;
 
@@ -121,7 +114,11 @@ namespace Sc
 
 						bool						computeLambda(PxArticulationCache& cache, PxArticulationCache& rollBackCache, const PxReal* const jointTorque, const PxVec3 gravity, const PxU32 maxIter) const;
 
-						void						computeGeneralizedMassMatrix(PxArticulationCache& cache) const;
+						void						computeGeneralizedMassMatrix(PxArticulationCache& cache, const bool rootMotion) const;
+
+						PxVec3						computeArticulationCOM(const bool rootFrame) const;
+
+						void						computeCentroidalMomentumMatrix(PxArticulationCache& cache) const;
 
 						PxU32						getCoefficientMatrixSize() const;
 
