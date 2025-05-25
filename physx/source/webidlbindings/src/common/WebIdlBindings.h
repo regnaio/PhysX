@@ -486,7 +486,15 @@ struct NativeArrayHelpers {
         return &base[index];
     }
 
+    static PxActorPtr* getActorPtrAt(PxActorPtr* base, int index) {
+        return &base[index];
+    }
+
     static physx::PxBounds3* getBounds3At(physx::PxBounds3* base, int index) {
+        return &base[index];
+    }
+
+    static physx::PxConstraintInfo* getConstraintInfoAt(physx::PxConstraintInfo* base, int index) {
         return &base[index];
     }
 
@@ -583,6 +591,13 @@ struct SupportFunctions {
         activeActors.resize(static_cast<size_t>(nbActors));
         std::memcpy(activeActors.begin(), actors, static_cast<size_t>(sizeof(physx::PxActor*) * nbActors));
         return activeActors;
+    }
+
+    static PxArray_PxActorPtr& PxSimulationEventCallback_getActors(physx::PxActor** actors, physx::PxU32 count) {
+        static PxArray_PxActorPtr actorPtrArray;
+        actorPtrArray.resize(static_cast<size_t>(count));
+        std::memcpy(actorPtrArray.begin(), actors, static_cast<size_t>(sizeof(physx::PxActor*) * count));
+        return actorPtrArray;
     }
 
     static physx::PxU32 PxArticulationReducedCoordinate_getMinSolverPositionIterations(physx::PxArticulationReducedCoordinate* articulation) {

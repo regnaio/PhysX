@@ -189,7 +189,9 @@ interface NativeArrayHelpers {
     [Value] static PxI32Ptr voidToI32Ptr(VoidPtr voidPtr);
     [Value] static PxRealPtr voidToRealPtr(VoidPtr voidPtr);
     static PxActor getActorAt(PxActor base, long index);
+    static PxActorPtr getActorPtrAt(PxActorPtr base, long index);
     static PxBounds3 getBounds3At(PxBounds3 base, long index);
+    static PxConstraintInfo getConstraintInfoAt(PxConstraintInfo base, long index);
     static PxContactPair getContactPairAt(PxContactPair base, long index);
     static PxContactPairHeader getContactPairHeaderAt(PxContactPairHeader base, long index);
     static PxController getControllerAt(PxController base, long index);
@@ -3736,6 +3738,7 @@ interface Support {
 interface SupportFunctions {
     static PxShape PxActor_getShape([Ref] PxRigidActor actor, long index);
     [Ref] static PxArray_PxActorPtr PxScene_getActiveActors(PxScene scene);
+    [Ref] static PxArray_PxActorPtr PxSimulationEventCallback_getActors(PxActorPtr actors, unsigned long count);
     static unsigned long PxArticulationReducedCoordinate_getMinSolverPositionIterations(PxArticulationReducedCoordinate articulation);
     static unsigned long PxArticulationReducedCoordinate_getMinSolverVelocityIterations(PxArticulationReducedCoordinate articulation);
 };
