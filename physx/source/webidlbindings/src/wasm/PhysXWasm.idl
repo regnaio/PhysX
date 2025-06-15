@@ -2433,9 +2433,12 @@ interface PxSceneQuerySystemBase {
     PxSceneQueryUpdateModeEnum getUpdateMode();
     unsigned long getStaticTimestamp();
     void flushUpdates();
-    boolean raycast([Const, Ref] PxVec3 origin, [Const, Ref] PxVec3 unitDir, float distance, [Ref] PxRaycastCallback hitCall, [Ref] optional PxHitFlags hitFlags, [Const, Ref] optional PxQueryFilterData filterData);
-    boolean sweep([Const, Ref] PxGeometry geometry, [Const, Ref] PxTransform pose, [Const, Ref] PxVec3 unitDir, float distance, [Ref] PxSweepCallback hitCall, [Ref] optional PxHitFlags hitFlags, [Const, Ref] optional PxQueryFilterData filterData);
-    boolean overlap([Const, Ref] PxGeometry geometry, [Const, Ref] PxTransform pose, [Ref] PxOverlapCallback hitCall, [Const, Ref] optional PxQueryFilterData filterData);
+    // boolean raycast([Const, Ref] PxVec3 origin, [Const, Ref] PxVec3 unitDir, float distance, [Ref] PxRaycastCallback hitCall, [Ref] optional PxHitFlags hitFlags, [Const, Ref] optional PxQueryFilterData filterData);
+    // boolean sweep([Const, Ref] PxGeometry geometry, [Const, Ref] PxTransform pose, [Const, Ref] PxVec3 unitDir, float distance, [Ref] PxSweepCallback hitCall, [Ref] optional PxHitFlags hitFlags, [Const, Ref] optional PxQueryFilterData filterData);
+    // boolean overlap([Const, Ref] PxGeometry geometry, [Const, Ref] PxTransform pose, [Ref] PxOverlapCallback hitCall, [Const, Ref] optional PxQueryFilterData filterData);
+    boolean raycast([Const, Ref] PxVec3 origin, [Const, Ref] PxVec3 unitDir, float distance, [Ref] PxRaycastCallback hitCall, [Ref] optional PxHitFlags hitFlags, [Const, Ref] optional PxQueryFilterData filterDat, optional PxQueryFilterCallback filterCall);
+    boolean sweep([Const, Ref] PxGeometry geometry, [Const, Ref] PxTransform pose, [Const, Ref] PxVec3 unitDir, float distance, [Ref] PxSweepCallback hitCall, [Ref] optional PxHitFlags hitFlags, [Const, Ref] optional PxQueryFilterData filterData, optional PxQueryFilterCallback filterCall);
+    boolean overlap([Const, Ref] PxGeometry geometry, [Const, Ref] PxTransform pose, [Ref] PxOverlapCallback hitCall, [Const, Ref] optional PxQueryFilterData filterData, optional PxQueryFilterCallback filterCall);
 };
 
 [Prefix="physx::", NoDelete]
