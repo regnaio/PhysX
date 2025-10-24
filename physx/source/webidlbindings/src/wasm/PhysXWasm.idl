@@ -1626,8 +1626,6 @@ interface PxJoint {
     [Value] PxConstraintFlags getConstraintFlags();
     void setInvMassScale0(float invMassScale);
     float getInvMassScale0();
-    void setInvInertiaScale0(float invInertiaScale);
-    float getInvInertiaScale0();
     void setInvMassScale1(float invMassScale);
     float getInvMassScale1();
     void setInvInertiaScale0(float invInertiaScale);
