@@ -552,6 +552,11 @@ JNIEXPORT void JNICALL Java_physx_PxTopLevelFunctions_00024Raw_ScaleRigidActor(J
 JNIEXPORT void JNICALL Java_physx_PxTopLevelFunctions_00024Raw_IntegrateTransform(JNIEnv*, jclass, jlong curTrans, jlong linvel, jlong angvel, jfloat timeStep, jlong result) {
     PxTopLevelFunctions::IntegrateTransform(*((physx::PxTransform*) curTrans), *((physx::PxVec3*) linvel), *((physx::PxVec3*) angvel), timeStep, *((physx::PxTransform*) result));
 }
+JNIEXPORT jlong JNICALL Java_physx_PxTopLevelFunctions_00024Raw_GetTriangleMeshSDFDimensions(JNIEnv*, jclass, jlong mesh) {
+    static thread_local physx::PxDim3 _cache = PxTopLevelFunctions::GetTriangleMeshSDFDimensions(*((physx::PxTriangleMesh*) mesh));
+    _cache = PxTopLevelFunctions::GetTriangleMeshSDFDimensions(*((physx::PxTriangleMesh*) mesh));
+    return (jlong) &_cache;
+}
 JNIEXPORT jint JNICALL Java_physx_PxTopLevelFunctions_00024Raw_getPHYSICS_1VERSION(JNIEnv*, jclass) {
     return (jint) PxTopLevelFunctions::PHYSICS_VERSION;
 }
@@ -2113,6 +2118,41 @@ JNIEXPORT void JNICALL Java_physx_common_PxDefaultErrorCallback_00024Raw_destroy
     delete (physx::PxDefaultErrorCallback*) _address;
 }
 
+// PxDim3
+JNIEXPORT jint JNICALL Java_physx_common_PxDim3__1_1sizeOf(JNIEnv*, jclass) {
+    return sizeof(physx::PxDim3);
+}
+JNIEXPORT jlong JNICALL Java_physx_common_PxDim3_00024Raw_PxDim3(JNIEnv*, jclass) {
+    return (jlong) new physx::PxDim3();
+}
+JNIEXPORT void JNICALL Java_physx_common_PxDim3_00024Raw_destroy(JNIEnv*, jclass, jlong _address) {
+    delete (physx::PxDim3*) _address;
+}
+JNIEXPORT jint JNICALL Java_physx_common_PxDim3_00024Raw_getX(JNIEnv*, jclass, jlong _address) {
+    physx::PxDim3* _self = (physx::PxDim3*) _address;
+    return (jint) _self->x;
+}
+JNIEXPORT void JNICALL Java_physx_common_PxDim3_00024Raw_setX(JNIEnv*, jclass, jlong _address, jint value) {
+    physx::PxDim3* _self = (physx::PxDim3*) _address;
+    _self->x = value;
+}
+JNIEXPORT jint JNICALL Java_physx_common_PxDim3_00024Raw_getY(JNIEnv*, jclass, jlong _address) {
+    physx::PxDim3* _self = (physx::PxDim3*) _address;
+    return (jint) _self->y;
+}
+JNIEXPORT void JNICALL Java_physx_common_PxDim3_00024Raw_setY(JNIEnv*, jclass, jlong _address, jint value) {
+    physx::PxDim3* _self = (physx::PxDim3*) _address;
+    _self->y = value;
+}
+JNIEXPORT jint JNICALL Java_physx_common_PxDim3_00024Raw_getZ(JNIEnv*, jclass, jlong _address) {
+    physx::PxDim3* _self = (physx::PxDim3*) _address;
+    return (jint) _self->z;
+}
+JNIEXPORT void JNICALL Java_physx_common_PxDim3_00024Raw_setZ(JNIEnv*, jclass, jlong _address, jint value) {
+    physx::PxDim3* _self = (physx::PxDim3*) _address;
+    _self->z = value;
+}
+
 // PxErrorCallback
 JNIEXPORT jint JNICALL Java_physx_common_PxErrorCallback__1_1sizeOf(JNIEnv*, jclass) {
     return sizeof(physx::PxErrorCallback);
@@ -3288,6 +3328,133 @@ JNIEXPORT void JNICALL Java_physx_cooking_PxMidphaseDesc_00024Raw_setMBVH34Desc(
     _self->mBVH34Desc = *((physx::PxBVH34MidphaseDesc*) value);
 }
 
+// PxSDFDesc
+JNIEXPORT jint JNICALL Java_physx_cooking_PxSDFDesc__1_1sizeOf(JNIEnv*, jclass) {
+    return sizeof(physx::PxSDFDesc);
+}
+JNIEXPORT jlong JNICALL Java_physx_cooking_PxSDFDesc_00024Raw_PxSDFDesc(JNIEnv*, jclass) {
+    return (jlong) new physx::PxSDFDesc();
+}
+JNIEXPORT jboolean JNICALL Java_physx_cooking_PxSDFDesc_00024Raw_isValid(JNIEnv*, jclass, jlong _address) {
+    physx::PxSDFDesc* self = (physx::PxSDFDesc*) _address;
+    return (jboolean) self->isValid();
+}
+JNIEXPORT void JNICALL Java_physx_cooking_PxSDFDesc_00024Raw_destroy(JNIEnv*, jclass, jlong _address) {
+    delete (physx::PxSDFDesc*) _address;
+}
+JNIEXPORT jlong JNICALL Java_physx_cooking_PxSDFDesc_00024Raw_getSdf(JNIEnv*, jclass, jlong _address) {
+    physx::PxSDFDesc* _self = (physx::PxSDFDesc*) _address;
+    return (jlong) &_self->sdf;
+}
+JNIEXPORT void JNICALL Java_physx_cooking_PxSDFDesc_00024Raw_setSdf(JNIEnv*, jclass, jlong _address, jlong value) {
+    physx::PxSDFDesc* _self = (physx::PxSDFDesc*) _address;
+    _self->sdf = *((physx::PxBoundedData*) value);
+}
+JNIEXPORT jlong JNICALL Java_physx_cooking_PxSDFDesc_00024Raw_getDims(JNIEnv*, jclass, jlong _address) {
+    physx::PxSDFDesc* _self = (physx::PxSDFDesc*) _address;
+    return (jlong) &_self->dims;
+}
+JNIEXPORT void JNICALL Java_physx_cooking_PxSDFDesc_00024Raw_setDims(JNIEnv*, jclass, jlong _address, jlong value) {
+    physx::PxSDFDesc* _self = (physx::PxSDFDesc*) _address;
+    _self->dims = *((physx::PxDim3*) value);
+}
+JNIEXPORT jlong JNICALL Java_physx_cooking_PxSDFDesc_00024Raw_getMeshLower(JNIEnv*, jclass, jlong _address) {
+    physx::PxSDFDesc* _self = (physx::PxSDFDesc*) _address;
+    return (jlong) &_self->meshLower;
+}
+JNIEXPORT void JNICALL Java_physx_cooking_PxSDFDesc_00024Raw_setMeshLower(JNIEnv*, jclass, jlong _address, jlong value) {
+    physx::PxSDFDesc* _self = (physx::PxSDFDesc*) _address;
+    _self->meshLower = *((physx::PxVec3*) value);
+}
+JNIEXPORT jfloat JNICALL Java_physx_cooking_PxSDFDesc_00024Raw_getSpacing(JNIEnv*, jclass, jlong _address) {
+    physx::PxSDFDesc* _self = (physx::PxSDFDesc*) _address;
+    return (jfloat) _self->spacing;
+}
+JNIEXPORT void JNICALL Java_physx_cooking_PxSDFDesc_00024Raw_setSpacing(JNIEnv*, jclass, jlong _address, jfloat value) {
+    physx::PxSDFDesc* _self = (physx::PxSDFDesc*) _address;
+    _self->spacing = value;
+}
+JNIEXPORT jint JNICALL Java_physx_cooking_PxSDFDesc_00024Raw_getSubgridSize(JNIEnv*, jclass, jlong _address) {
+    physx::PxSDFDesc* _self = (physx::PxSDFDesc*) _address;
+    return (jint) _self->subgridSize;
+}
+JNIEXPORT void JNICALL Java_physx_cooking_PxSDFDesc_00024Raw_setSubgridSize(JNIEnv*, jclass, jlong _address, jint value) {
+    physx::PxSDFDesc* _self = (physx::PxSDFDesc*) _address;
+    _self->subgridSize = value;
+}
+JNIEXPORT jint JNICALL Java_physx_cooking_PxSDFDesc_00024Raw_getBitsPerSubgridPixel(JNIEnv*, jclass, jlong _address) {
+    physx::PxSDFDesc* _self = (physx::PxSDFDesc*) _address;
+    return (jint) _self->bitsPerSubgridPixel;
+}
+JNIEXPORT void JNICALL Java_physx_cooking_PxSDFDesc_00024Raw_setBitsPerSubgridPixel(JNIEnv*, jclass, jlong _address, jint value) {
+    physx::PxSDFDesc* _self = (physx::PxSDFDesc*) _address;
+    _self->bitsPerSubgridPixel = (PxSdfBitsPerSubgridPixelEnum) value;
+}
+JNIEXPORT jlong JNICALL Java_physx_cooking_PxSDFDesc_00024Raw_getSdfSubgrids3DTexBlockDim(JNIEnv*, jclass, jlong _address) {
+    physx::PxSDFDesc* _self = (physx::PxSDFDesc*) _address;
+    return (jlong) &_self->sdfSubgrids3DTexBlockDim;
+}
+JNIEXPORT void JNICALL Java_physx_cooking_PxSDFDesc_00024Raw_setSdfSubgrids3DTexBlockDim(JNIEnv*, jclass, jlong _address, jlong value) {
+    physx::PxSDFDesc* _self = (physx::PxSDFDesc*) _address;
+    _self->sdfSubgrids3DTexBlockDim = *((physx::PxDim3*) value);
+}
+JNIEXPORT jlong JNICALL Java_physx_cooking_PxSDFDesc_00024Raw_getSdfSubgrids(JNIEnv*, jclass, jlong _address) {
+    physx::PxSDFDesc* _self = (physx::PxSDFDesc*) _address;
+    return (jlong) &_self->sdfSubgrids;
+}
+JNIEXPORT void JNICALL Java_physx_cooking_PxSDFDesc_00024Raw_setSdfSubgrids(JNIEnv*, jclass, jlong _address, jlong value) {
+    physx::PxSDFDesc* _self = (physx::PxSDFDesc*) _address;
+    _self->sdfSubgrids = *((physx::PxBoundedData*) value);
+}
+JNIEXPORT jlong JNICALL Java_physx_cooking_PxSDFDesc_00024Raw_getSdfStartSlots(JNIEnv*, jclass, jlong _address) {
+    physx::PxSDFDesc* _self = (physx::PxSDFDesc*) _address;
+    return (jlong) &_self->sdfStartSlots;
+}
+JNIEXPORT void JNICALL Java_physx_cooking_PxSDFDesc_00024Raw_setSdfStartSlots(JNIEnv*, jclass, jlong _address, jlong value) {
+    physx::PxSDFDesc* _self = (physx::PxSDFDesc*) _address;
+    _self->sdfStartSlots = *((physx::PxBoundedData*) value);
+}
+JNIEXPORT jfloat JNICALL Java_physx_cooking_PxSDFDesc_00024Raw_getSubgridsMinSdfValue(JNIEnv*, jclass, jlong _address) {
+    physx::PxSDFDesc* _self = (physx::PxSDFDesc*) _address;
+    return (jfloat) _self->subgridsMinSdfValue;
+}
+JNIEXPORT void JNICALL Java_physx_cooking_PxSDFDesc_00024Raw_setSubgridsMinSdfValue(JNIEnv*, jclass, jlong _address, jfloat value) {
+    physx::PxSDFDesc* _self = (physx::PxSDFDesc*) _address;
+    _self->subgridsMinSdfValue = value;
+}
+JNIEXPORT jfloat JNICALL Java_physx_cooking_PxSDFDesc_00024Raw_getSubgridsMaxSdfValue(JNIEnv*, jclass, jlong _address) {
+    physx::PxSDFDesc* _self = (physx::PxSDFDesc*) _address;
+    return (jfloat) _self->subgridsMaxSdfValue;
+}
+JNIEXPORT void JNICALL Java_physx_cooking_PxSDFDesc_00024Raw_setSubgridsMaxSdfValue(JNIEnv*, jclass, jlong _address, jfloat value) {
+    physx::PxSDFDesc* _self = (physx::PxSDFDesc*) _address;
+    _self->subgridsMaxSdfValue = value;
+}
+JNIEXPORT jlong JNICALL Java_physx_cooking_PxSDFDesc_00024Raw_getSdfBounds(JNIEnv*, jclass, jlong _address) {
+    physx::PxSDFDesc* _self = (physx::PxSDFDesc*) _address;
+    return (jlong) &_self->sdfBounds;
+}
+JNIEXPORT void JNICALL Java_physx_cooking_PxSDFDesc_00024Raw_setSdfBounds(JNIEnv*, jclass, jlong _address, jlong value) {
+    physx::PxSDFDesc* _self = (physx::PxSDFDesc*) _address;
+    _self->sdfBounds = *((physx::PxBounds3*) value);
+}
+JNIEXPORT jfloat JNICALL Java_physx_cooking_PxSDFDesc_00024Raw_getNarrowBandThicknessRelativeToSdfBoundsDiagonal(JNIEnv*, jclass, jlong _address) {
+    physx::PxSDFDesc* _self = (physx::PxSDFDesc*) _address;
+    return (jfloat) _self->narrowBandThicknessRelativeToSdfBoundsDiagonal;
+}
+JNIEXPORT void JNICALL Java_physx_cooking_PxSDFDesc_00024Raw_setNarrowBandThicknessRelativeToSdfBoundsDiagonal(JNIEnv*, jclass, jlong _address, jfloat value) {
+    physx::PxSDFDesc* _self = (physx::PxSDFDesc*) _address;
+    _self->narrowBandThicknessRelativeToSdfBoundsDiagonal = value;
+}
+JNIEXPORT jint JNICALL Java_physx_cooking_PxSDFDesc_00024Raw_getNumThreadsForSdfConstruction(JNIEnv*, jclass, jlong _address) {
+    physx::PxSDFDesc* _self = (physx::PxSDFDesc*) _address;
+    return (jint) _self->numThreadsForSdfConstruction;
+}
+JNIEXPORT void JNICALL Java_physx_cooking_PxSDFDesc_00024Raw_setNumThreadsForSdfConstruction(JNIEnv*, jclass, jlong _address, jint value) {
+    physx::PxSDFDesc* _self = (physx::PxSDFDesc*) _address;
+    _self->numThreadsForSdfConstruction = value;
+}
+
 // PxTriangleMeshDesc
 JNIEXPORT jint JNICALL Java_physx_cooking_PxTriangleMeshDesc__1_1sizeOf(JNIEnv*, jclass) {
     return sizeof(physx::PxTriangleMeshDesc);
@@ -3308,6 +3475,14 @@ JNIEXPORT jlong JNICALL Java_physx_cooking_PxTriangleMeshDesc_00024Raw_getMateri
 JNIEXPORT void JNICALL Java_physx_cooking_PxTriangleMeshDesc_00024Raw_setMaterialIndices(JNIEnv*, jclass, jlong _address, jlong value) {
     physx::PxTriangleMeshDesc* _self = (physx::PxTriangleMeshDesc*) _address;
     _self->materialIndices = *((PxTypedBoundedData_PxU16Const*) value);
+}
+JNIEXPORT jlong JNICALL Java_physx_cooking_PxTriangleMeshDesc_00024Raw_getSdfDesc(JNIEnv*, jclass, jlong _address) {
+    physx::PxTriangleMeshDesc* _self = (physx::PxTriangleMeshDesc*) _address;
+    return (jlong) _self->sdfDesc;
+}
+JNIEXPORT void JNICALL Java_physx_cooking_PxTriangleMeshDesc_00024Raw_setSdfDesc(JNIEnv*, jclass, jlong _address, jlong value) {
+    physx::PxTriangleMeshDesc* _self = (physx::PxTriangleMeshDesc*) _address;
+    _self->sdfDesc = (physx::PxSDFDesc*) value;
 }
 
 // PxConvexFlagEnum
@@ -3362,6 +3537,9 @@ JNIEXPORT jint JNICALL Java_physx_cooking_PxMeshPreprocessingFlagEnum__1geteDISA
 JNIEXPORT jint JNICALL Java_physx_cooking_PxMeshPreprocessingFlagEnum__1geteFORCE_132BIT_1INDICES(JNIEnv*, jclass) {
     return PxMeshPreprocessingFlagEnum::eFORCE_32BIT_INDICES;
 }
+JNIEXPORT jint JNICALL Java_physx_cooking_PxMeshPreprocessingFlagEnum__1geteENABLE_1INERTIA(JNIEnv*, jclass) {
+    return PxMeshPreprocessingFlagEnum::eENABLE_INERTIA;
+}
 
 // PxMeshMidPhaseEnum
 JNIEXPORT jint JNICALL Java_physx_cooking_PxMeshMidPhaseEnum__1geteBVH33(JNIEnv*, jclass) {
@@ -3369,6 +3547,17 @@ JNIEXPORT jint JNICALL Java_physx_cooking_PxMeshMidPhaseEnum__1geteBVH33(JNIEnv*
 }
 JNIEXPORT jint JNICALL Java_physx_cooking_PxMeshMidPhaseEnum__1geteBVH34(JNIEnv*, jclass) {
     return PxMeshMidPhaseEnum::eBVH34;
+}
+
+// PxSdfBitsPerSubgridPixelEnum
+JNIEXPORT jint JNICALL Java_physx_cooking_PxSdfBitsPerSubgridPixelEnum__1gete8_1BIT_1PER_1PIXEL(JNIEnv*, jclass) {
+    return PxSdfBitsPerSubgridPixelEnum::e8_BIT_PER_PIXEL;
+}
+JNIEXPORT jint JNICALL Java_physx_cooking_PxSdfBitsPerSubgridPixelEnum__1gete16_1BIT_1PER_1PIXEL(JNIEnv*, jclass) {
+    return PxSdfBitsPerSubgridPixelEnum::e16_BIT_PER_PIXEL;
+}
+JNIEXPORT jint JNICALL Java_physx_cooking_PxSdfBitsPerSubgridPixelEnum__1gete32_1BIT_1PER_1PIXEL(JNIEnv*, jclass) {
+    return PxSdfBitsPerSubgridPixelEnum::e32_BIT_PER_PIXEL;
 }
 
 // PxGjkQueryProximityInfoResult
@@ -5022,6 +5211,12 @@ JNIEXPORT jint JNICALL Java_physx_extensions_PxD6DriveEnum__1geteTWIST(JNIEnv*, 
 JNIEXPORT jint JNICALL Java_physx_extensions_PxD6DriveEnum__1geteSLERP(JNIEnv*, jclass) {
     return PxD6DriveEnum::eSLERP;
 }
+JNIEXPORT jint JNICALL Java_physx_extensions_PxD6DriveEnum__1geteSWING1(JNIEnv*, jclass) {
+    return PxD6DriveEnum::eSWING1;
+}
+JNIEXPORT jint JNICALL Java_physx_extensions_PxD6DriveEnum__1geteSWING2(JNIEnv*, jclass) {
+    return PxD6DriveEnum::eSWING2;
+}
 
 // PxD6JointDriveFlagEnum
 JNIEXPORT jint JNICALL Java_physx_extensions_PxD6JointDriveFlagEnum__1geteACCELERATION(JNIEnv*, jclass) {
@@ -6595,6 +6790,16 @@ JNIEXPORT jlong JNICALL Java_physx_geometry_PxTriangleMesh_00024Raw_getLocalBoun
     static thread_local physx::PxBounds3 _cache = self->getLocalBounds();
     _cache = self->getLocalBounds();
     return (jlong) &_cache;
+}
+JNIEXPORT jlong JNICALL Java_physx_geometry_PxTriangleMesh_00024Raw_getSDF(JNIEnv*, jclass, jlong _address) {
+    physx::PxTriangleMesh* self = (physx::PxTriangleMesh*) _address;
+    static thread_local PxRealConstPtr _cache = self->getSDF();
+    _cache = self->getSDF();
+    return (jlong) &_cache;
+}
+JNIEXPORT void JNICALL Java_physx_geometry_PxTriangleMesh_00024Raw_setPreferSDFProjection(JNIEnv*, jclass, jlong _address, jboolean prefer) {
+    physx::PxTriangleMesh* self = (physx::PxTriangleMesh*) _address;
+    self->setPreferSDFProjection(prefer);
 }
 
 // PxTriangleMeshAnalysisResults

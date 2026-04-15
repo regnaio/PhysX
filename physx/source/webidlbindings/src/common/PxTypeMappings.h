@@ -163,6 +163,7 @@ typedef physx::PxRigidBodyFlag::Enum PxRigidBodyFlagEnum;
 typedef physx::PxRigidDynamicLockFlag::Enum PxRigidDynamicLockFlagEnum;
 typedef physx::PxSceneFlag::Enum PxSceneFlagEnum;
 typedef physx::PxSceneQueryUpdateMode::Enum PxSceneQueryUpdateModeEnum;
+typedef physx::PxSdfBitsPerSubgridPixel::Enum PxSdfBitsPerSubgridPixelEnum;
 typedef physx::PxShapeFlag::Enum PxShapeFlagEnum;
 typedef physx::PxSphericalJointFlag::Enum PxSphericalJointFlagEnum;
 typedef physx::PxSolverType::Enum PxSolverTypeEnum;

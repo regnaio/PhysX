@@ -1395,6 +1395,14 @@ interface PxDefaultMemoryOutputStream {
 PxDefaultMemoryOutputStream implements PxOutputStream;
 
 [Prefix="physx::"]
+interface PxDim3 {
+    void PxDim3();
+    attribute unsigned long x;
+    attribute unsigned long y;
+    attribute unsigned long z;
+};
+
+[Prefix="physx::"]
 interface PxDistanceJoint {
     float getDistance();
     void setMinDistance(float distance);
@@ -2319,6 +2327,26 @@ interface PxRigidStatic {
 };
 PxRigidStatic implements PxRigidActor;
 
+[Prefix="physx::"]
+interface PxSDFDesc {
+    void PxSDFDesc();
+    boolean isValid();
+    [Value] attribute PxBoundedData sdf;
+    [Value] attribute PxDim3 dims;
+    [Value] attribute PxVec3 meshLower;
+    attribute float spacing;
+    attribute unsigned long subgridSize;
+    attribute PxSdfBitsPerSubgridPixelEnum bitsPerSubgridPixel;
+    [Value] attribute PxDim3 sdfSubgrids3DTexBlockDim;
+    [Value] attribute PxBoundedData sdfSubgrids;
+    [Value] attribute PxBoundedData sdfStartSlots;
+    attribute float subgridsMinSdfValue;
+    attribute float subgridsMaxSdfValue;
+    [Value] attribute PxBounds3 sdfBounds;
+    attribute float narrowBandThicknessRelativeToSdfBoundsDiagonal;
+    attribute unsigned long numThreadsForSdfConstruction;
+};
+
 [Prefix="physx::", NoDelete]
 interface PxScene {
     boolean addActor([Ref] PxActor actor, [Const] optional PxBVH bvh);
@@ -2823,7 +2851,6 @@ interface PxTopLevelFunctions {
     static PxSphericalJoint SphericalJointCreate([Ref] PxPhysics physics, PxRigidActor actor0, [Ref] PxTransform localFrame0, PxRigidActor actor1, [Ref] PxTransform localFrame1);
     static PxConvexMesh CreateConvexMesh([Const, Ref] PxCookingParams params, [Const, Ref] PxConvexMeshDesc desc);
     static PxTriangleMesh CreateTriangleMesh([Const, Ref] PxCookingParams params, [Const, Ref] PxTriangleMeshDesc desc);
-    [Value] static PxDim3 GetTriangleMeshSDFDimensions([Const, Ref] PxTriangleMesh mesh);
     static PxHeightField CreateHeightField([Const, Ref] PxHeightFieldDesc desc);
     static boolean CookTriangleMesh([Const, Ref] PxCookingParams params, [Const, Ref] PxTriangleMeshDesc desc, [Ref] PxOutputStream stream);
     static boolean CookConvexMesh([Const, Ref] PxCookingParams params, [Const, Ref] PxConvexMeshDesc desc, [Ref] PxOutputStream stream);
@@ -2839,6 +2866,7 @@ interface PxTopLevelFunctions {
     static PxRigidDynamic CloneDynamic([Ref] PxPhysics physicsSDK, [Const, Ref] PxTransform transform, [Const, Ref] PxRigidDynamic from);
     static void ScaleRigidActor([Ref] PxRigidActor actor, float scale, boolean scaleMassProps);
     static void IntegrateTransform([Const, Ref] PxTransform curTrans, [Const, Ref] PxVec3 linvel, [Const, Ref] PxVec3 angvel, float timeStep, [Ref] PxTransform result);
+    [Value] static PxDim3 GetTriangleMeshSDFDimensions([Const, Ref] PxTriangleMesh mesh);
     static readonly attribute unsigned long PHYSICS_VERSION;
 };
 
@@ -2891,34 +2919,6 @@ interface PxTriangleMeshAnalysisResults {
     boolean isSet(PxTriangleMeshAnalysisResultEnum flag);
     void raise(PxTriangleMeshAnalysisResultEnum flag);
     void clear(PxTriangleMeshAnalysisResultEnum flag);
-};
-
-[Prefix="physx::"]
-interface PxDim3 {
-    void PxDim3();
-    attribute unsigned long x;
-    attribute unsigned long y;
-    attribute unsigned long z;
-};
-
-[Prefix="physx::"]
-interface PxSDFDesc {
-    void PxSDFDesc();
-    [Value] attribute PxBoundedData sdf;
-    [Value] attribute PxDim3 dims;
-    [Value] attribute PxVec3 meshLower;
-    attribute float spacing;
-    attribute unsigned long subgridSize;
-    attribute PxSdfBitsPerSubgridPixelEnum bitsPerSubgridPixel;
-    [Value] attribute PxDim3 sdfSubgrids3DTexBlockDim;
-    [Value] attribute PxBoundedData sdfSubgrids;
-    [Value] attribute PxBoundedData sdfStartSlots;
-    attribute float subgridsMinSdfValue;
-    attribute float subgridsMaxSdfValue;
-    [Value] attribute PxBounds3 sdfBounds;
-    attribute float narrowBandThicknessRelativeToSdfBoundsDiagonal;
-    attribute unsigned long numThreadsForSdfConstruction;
-    boolean isValid();
 };
 
 [Prefix="physx::"]
@@ -4163,7 +4163,9 @@ enum PxD6DriveEnum {
     "PxD6DriveEnum::eZ",
     "PxD6DriveEnum::eSWING",
     "PxD6DriveEnum::eTWIST",
-    "PxD6DriveEnum::eSLERP"
+    "PxD6DriveEnum::eSLERP",
+    "PxD6DriveEnum::eSWING1",
+    "PxD6DriveEnum::eSWING2"
 };
 
 enum PxD6JointDriveFlagEnum {
@@ -4321,12 +4323,6 @@ enum PxMeshPreprocessingFlagEnum {
     "PxMeshPreprocessingFlagEnum::eENABLE_INERTIA"
 };
 
-enum PxSdfBitsPerSubgridPixelEnum {
-    "PxSdfBitsPerSubgridPixelEnum::e8_BIT_PER_PIXEL",
-    "PxSdfBitsPerSubgridPixelEnum::e16_BIT_PER_PIXEL",
-    "PxSdfBitsPerSubgridPixelEnum::e32_BIT_PER_PIXEL"
-};
-
 enum PxPairFilteringModeEnum {
     "PxPairFilteringModeEnum::eKEEP",
     "PxPairFilteringModeEnum::eSUPPRESS",
@@ -4441,6 +4437,12 @@ enum PxSceneQueryUpdateModeEnum {
     "PxSceneQueryUpdateModeEnum::eBUILD_ENABLED_COMMIT_ENABLED",
     "PxSceneQueryUpdateModeEnum::eBUILD_ENABLED_COMMIT_DISABLED",
     "PxSceneQueryUpdateModeEnum::eBUILD_DISABLED_COMMIT_DISABLED"
+};
+
+enum PxSdfBitsPerSubgridPixelEnum {
+    "PxSdfBitsPerSubgridPixelEnum::e8_BIT_PER_PIXEL",
+    "PxSdfBitsPerSubgridPixelEnum::e16_BIT_PER_PIXEL",
+    "PxSdfBitsPerSubgridPixelEnum::e32_BIT_PER_PIXEL"
 };
 
 enum PxShapeFlagEnum {
