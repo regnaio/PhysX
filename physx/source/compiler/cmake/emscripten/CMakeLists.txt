@@ -93,6 +93,7 @@ SET(CLANG_WARNINGS "-ferror-limit=0 -Wall -Wextra -Werror -Wstrict-aliasing=2 -W
     -Wno-missing-include-dirs \
     -Wno-nrvo \
     -Wno-format-signedness \
+    -Wno-unique-object-duplication \
 ")
 
 # Set to true to enable multi-threading - works but is difficult to use
