@@ -1,0 +1,26 @@
+sdk_source_bin/CMakeFiles/PhysX.dir/src/PhysX/physx/source/physx/src/gpu/PxPhysXGpuModuleLoader.cpp.o: \
+  /src/PhysX/physx/source/physx/src/gpu/PxPhysXGpuModuleLoader.cpp \
+  /src/PhysX/physx/include/PxPhysXConfig.h \
+  /src/PhysX/physx/include/common/PxPhysXCommonConfig.h \
+  /src/PhysX/physx/include/foundation/PxSimpleTypes.h \
+  /src/PhysX/physx/include/foundation/PxPreprocessor.h \
+  /emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/stddef.h \
+  /emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/__config \
+  /emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/__config_site \
+  /emsdk/upstream/lib/clang/18/include/stddef.h \
+  /emsdk/upstream/lib/clang/18/include/__stddef_ptrdiff_t.h \
+  /emsdk/upstream/lib/clang/18/include/__stddef_size_t.h \
+  /emsdk/upstream/lib/clang/18/include/__stddef_wchar_t.h \
+  /emsdk/upstream/lib/clang/18/include/__stddef_null.h \
+  /emsdk/upstream/lib/clang/18/include/__stddef_nullptr_t.h \
+  /emsdk/upstream/lib/clang/18/include/__stddef_max_align_t.h \
+  /emsdk/upstream/lib/clang/18/include/__stddef_offsetof.h \
+  /emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/stdint.h \
+  /emsdk/upstream/lib/clang/18/include/stdint.h \
+  /emsdk/upstream/emscripten/cache/sysroot/include/stdint.h \
+  /emsdk/upstream/emscripten/cache/sysroot/include/bits/alltypes.h \
+  /emsdk/upstream/emscripten/cache/sysroot/include/bits/stdint.h \
+  /emsdk/upstream/emscripten/cache/sysroot/include/c++/v1/inttypes.h \
+  /emsdk/upstream/lib/clang/18/include/inttypes.h \
+  /emsdk/upstream/emscripten/cache/sysroot/include/inttypes.h \
+  /emsdk/upstream/emscripten/cache/sysroot/include/features.h
