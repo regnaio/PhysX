@@ -1184,6 +1184,55 @@ interface PxControllersHit {
 };
 PxControllersHit implements PxControllerHit;
 
+interface PxConvexCoreBox {
+    void PxConvexCoreBox(float eX, float eY, float eZ);
+    [Value] attribute PxVec3 extents;
+};
+
+interface PxConvexCoreCone {
+    void PxConvexCoreCone(float height, float radius);
+    attribute float height;
+    attribute float radius;
+};
+
+interface PxConvexCoreCylinder {
+    void PxConvexCoreCylinder(float height, float radius);
+    attribute float height;
+    attribute float radius;
+};
+
+interface PxConvexCoreEllipsoid {
+    void PxConvexCoreEllipsoid(float rX, float rY, float rZ);
+    [Value] attribute PxVec3 radii;
+};
+
+[Prefix="physx::"]
+interface PxConvexCoreGeometry {
+    PxConvexCoreTypeEnum getCoreType();
+    [Const] VoidPtr getCoreData();
+    float getMargin();
+    boolean isValid();
+};
+PxConvexCoreGeometry implements PxGeometry;
+
+interface PxConvexCoreGeometryFactory {
+    static PxConvexCoreGeometry createFromBox([Const, Ref] PxConvexCoreBox box, float margin);
+    static PxConvexCoreGeometry createFromCone([Const, Ref] PxConvexCoreCone cone, float margin);
+    static PxConvexCoreGeometry createFromCylinder([Const, Ref] PxConvexCoreCylinder cylinder, float margin);
+    static PxConvexCoreGeometry createFromEllipsoid([Const, Ref] PxConvexCoreEllipsoid ellipsoid, float margin);
+    static PxConvexCoreGeometry createFromPoint([Const, Ref] PxConvexCorePoint point, float margin);
+    static PxConvexCoreGeometry createFromSegment([Const, Ref] PxConvexCoreSegment segment, float margin);
+};
+
+interface PxConvexCorePoint {
+    void PxConvexCorePoint();
+};
+
+interface PxConvexCoreSegment {
+    void PxConvexCoreSegment(float length);
+    attribute float length;
+};
+
 [Prefix="physx::"]
 interface PxConvexFlags {
     void PxConvexFlags(unsigned short flags);
@@ -1271,6 +1320,8 @@ interface PxD6Joint {
     [Value] PxTransform getDrivePosition();
     void setDriveVelocity([Const, Ref] PxVec3 linear, [Const, Ref] PxVec3 angular);
     void getDriveVelocity([Ref] PxVec3 linear, [Ref] PxVec3 angular);
+    void setAngularDriveConfig(PxD6AngularDriveConfigEnum config);
+    PxD6AngularDriveConfigEnum getAngularDriveConfig();
 };
 PxD6Joint implements PxJoint;
 
@@ -1349,6 +1400,14 @@ interface PxDefaultMemoryOutputStream {
     VoidPtr getData();
 };
 PxDefaultMemoryOutputStream implements PxOutputStream;
+
+[Prefix="physx::"]
+interface PxDim3 {
+    void PxDim3();
+    attribute unsigned long x;
+    attribute unsigned long y;
+    attribute unsigned long z;
+};
 
 [Prefix="physx::"]
 interface PxDistanceJoint {
@@ -2282,6 +2341,26 @@ interface PxRigidStatic {
 };
 PxRigidStatic implements PxRigidActor;
 
+[Prefix="physx::"]
+interface PxSDFDesc {
+    void PxSDFDesc();
+    boolean isValid();
+    [Value] attribute PxBoundedData sdf;
+    [Value] attribute PxDim3 dims;
+    [Value] attribute PxVec3 meshLower;
+    attribute float spacing;
+    attribute unsigned long subgridSize;
+    attribute PxSdfBitsPerSubgridPixelEnum bitsPerSubgridPixel;
+    [Value] attribute PxDim3 sdfSubgrids3DTexBlockDim;
+    [Value] attribute PxBoundedData sdfSubgrids;
+    [Value] attribute PxBoundedData sdfStartSlots;
+    attribute float subgridsMinSdfValue;
+    attribute float subgridsMaxSdfValue;
+    [Value] attribute PxBounds3 sdfBounds;
+    attribute float narrowBandThicknessRelativeToSdfBoundsDiagonal;
+    attribute unsigned long numThreadsForSdfConstruction;
+};
+
 [Prefix="physx::", NoDelete]
 interface PxScene {
     boolean addActor([Ref] PxActor actor, [Const] optional PxBVH bvh);
@@ -2804,6 +2883,7 @@ interface PxTopLevelFunctions {
     static PxRigidDynamic CloneDynamic([Ref] PxPhysics physicsSDK, [Const, Ref] PxTransform transform, [Const, Ref] PxRigidDynamic from);
     static void ScaleRigidActor([Ref] PxRigidActor actor, float scale, boolean scaleMassProps);
     static void IntegrateTransform([Const, Ref] PxTransform curTrans, [Const, Ref] PxVec3 linvel, [Const, Ref] PxVec3 angvel, float timeStep, [Ref] PxTransform result);
+    [Value] static PxDim3 GetTriangleMeshSDFDimensions([Const, Ref] PxTriangleMesh mesh);
     static readonly attribute unsigned long PHYSICS_VERSION;
 };
 
@@ -2845,6 +2925,8 @@ interface PxTriangleMesh {
     [Const, Value] PxU32ConstPtr getTrianglesRemap();
     unsigned short getTriangleMaterialIndex(unsigned long triangleIndex);
     [Value] PxBounds3 getLocalBounds();
+    [Const, Value] PxRealConstPtr getSDF();
+    void setPreferSDFProjection(boolean prefer);
 };
 PxTriangleMesh implements PxRefCounted;
 
@@ -2860,6 +2942,7 @@ interface PxTriangleMeshAnalysisResults {
 interface PxTriangleMeshDesc {
     void PxTriangleMeshDesc();
     [Const, Value] attribute PxTypedBoundedData_PxU16Const materialIndices;
+    attribute PxSDFDesc sdfDesc;
 };
 PxTriangleMeshDesc implements PxSimpleTriangleMesh;
 
@@ -4049,6 +4132,15 @@ enum PxControllerShapeTypeEnum {
     "PxControllerShapeTypeEnum::eCAPSULE"
 };
 
+enum PxConvexCoreTypeEnum {
+    "PxConvexCoreTypeEnum::ePOINT",
+    "PxConvexCoreTypeEnum::eSEGMENT",
+    "PxConvexCoreTypeEnum::eBOX",
+    "PxConvexCoreTypeEnum::eELLIPSOID",
+    "PxConvexCoreTypeEnum::eCYLINDER",
+    "PxConvexCoreTypeEnum::eCONE"
+};
+
 enum PxConvexFlagEnum {
     "PxConvexFlagEnum::e16_BIT_INDICES",
     "PxConvexFlagEnum::eCOMPUTE_CONVEX",
@@ -4068,6 +4160,12 @@ enum PxConvexMeshGeometryFlagEnum {
     "PxConvexMeshGeometryFlagEnum::eTIGHT_BOUNDS"
 };
 
+enum PxD6AngularDriveConfigEnum {
+    "PxD6AngularDriveConfigEnum::eSWING_TWIST",
+    "PxD6AngularDriveConfigEnum::eSLERP",
+    "PxD6AngularDriveConfigEnum::eLEGACY"
+};
+
 enum PxD6AxisEnum {
     "PxD6AxisEnum::eX",
     "PxD6AxisEnum::eY",
@@ -4083,7 +4181,9 @@ enum PxD6DriveEnum {
     "PxD6DriveEnum::eZ",
     "PxD6DriveEnum::eSWING",
     "PxD6DriveEnum::eTWIST",
-    "PxD6DriveEnum::eSLERP"
+    "PxD6DriveEnum::eSLERP",
+    "PxD6DriveEnum::eSWING1",
+    "PxD6DriveEnum::eSWING2"
 };
 
 enum PxD6JointDriveFlagEnum {
@@ -4167,7 +4267,10 @@ enum PxGeometryTypeEnum {
     "PxGeometryTypeEnum::ePLANE",
     "PxGeometryTypeEnum::eCAPSULE",
     "PxGeometryTypeEnum::eBOX",
+    "PxGeometryTypeEnum::eCONVEXCORE",
     "PxGeometryTypeEnum::eCONVEXMESH",
+    "PxGeometryTypeEnum::ePARTICLESYSTEM",
+    "PxGeometryTypeEnum::eTETRAHEDRONMESH",
     "PxGeometryTypeEnum::eTRIANGLEMESH",
     "PxGeometryTypeEnum::eHEIGHTFIELD",
     "PxGeometryTypeEnum::eCUSTOM"
@@ -4234,7 +4337,8 @@ enum PxMeshPreprocessingFlagEnum {
     "PxMeshPreprocessingFlagEnum::eWELD_VERTICES",
     "PxMeshPreprocessingFlagEnum::eDISABLE_CLEAN_MESH",
     "PxMeshPreprocessingFlagEnum::eDISABLE_ACTIVE_EDGES_PRECOMPUTE",
-    "PxMeshPreprocessingFlagEnum::eFORCE_32BIT_INDICES"
+    "PxMeshPreprocessingFlagEnum::eFORCE_32BIT_INDICES",
+    "PxMeshPreprocessingFlagEnum::eENABLE_INERTIA"
 };
 
 enum PxPairFilteringModeEnum {
@@ -4351,6 +4455,12 @@ enum PxSceneQueryUpdateModeEnum {
     "PxSceneQueryUpdateModeEnum::eBUILD_ENABLED_COMMIT_ENABLED",
     "PxSceneQueryUpdateModeEnum::eBUILD_ENABLED_COMMIT_DISABLED",
     "PxSceneQueryUpdateModeEnum::eBUILD_DISABLED_COMMIT_DISABLED"
+};
+
+enum PxSdfBitsPerSubgridPixelEnum {
+    "PxSdfBitsPerSubgridPixelEnum::e8_BIT_PER_PIXEL",
+    "PxSdfBitsPerSubgridPixelEnum::e16_BIT_PER_PIXEL",
+    "PxSdfBitsPerSubgridPixelEnum::e32_BIT_PER_PIXEL"
 };
 
 enum PxShapeFlagEnum {

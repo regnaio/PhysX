@@ -4,48 +4,48 @@
  */
 #include <jni.h>
 
-            static JavaVM* javaVm = NULL;
-            
-            class JniThreadEnv {
-                public:
-                    JniThreadEnv() : shouldDetach(false), env(NULL) { }
-                    JniThreadEnv(JNIEnv *env) : shouldDetach(false), env(env) { }
-                    ~JniThreadEnv() {
-                        if (shouldDetach) {
-                            javaVm->DetachCurrentThread();
-                        }
-                    }
-                    JNIEnv* getEnv() {
-                        if (env == NULL && javaVm != NULL) {
+static JavaVM* javaVm = NULL;
+
+class JniThreadEnv {
+    public:
+        JniThreadEnv() : shouldDetach(false), env(NULL) { }
+        JniThreadEnv(JNIEnv *env) : shouldDetach(false), env(env) { }
+        ~JniThreadEnv() {
+            if (shouldDetach) {
+                javaVm->DetachCurrentThread();
+            }
+        }
+        JNIEnv* getEnv() {
+            if (env == NULL && javaVm != NULL) {
 #ifndef __ANDROID__
-                            javaVm->AttachCurrentThreadAsDaemon((void**) &env, NULL);
+                javaVm->AttachCurrentThreadAsDaemon((void**) &env, NULL);
 #else
-                            javaVm->AttachCurrentThreadAsDaemon(&env, NULL);
+                javaVm->AttachCurrentThreadAsDaemon(&env, NULL);
 #endif
-                            shouldDetach = true;
-                        }
-                        return env;
-                    }
-                    
-                private:
-                    bool shouldDetach;
-                    JNIEnv *env;
-            };
-            
-            static thread_local JniThreadEnv jniThreadEnv;
-            
-            class JavaNativeRef {
-                public:
-                    JavaNativeRef(JNIEnv *env, jobject javaRef) {
-                        javaGlobalRef = env->NewGlobalRef(javaRef);
-                    }
-                    
-                    ~JavaNativeRef() {
-                        jniThreadEnv.getEnv()->DeleteGlobalRef(javaGlobalRef);
-                    }
-                    
-                    jobject javaGlobalRef;
-            };
+                shouldDetach = true;
+            }
+            return env;
+        }
+        
+    private:
+        bool shouldDetach;
+        JNIEnv *env;
+};
+
+static thread_local JniThreadEnv jniThreadEnv;
+
+class JavaNativeRef {
+    public:
+        JavaNativeRef(JNIEnv *env, jobject javaRef) {
+            javaGlobalRef = env->NewGlobalRef(javaRef);
+        }
+        
+        ~JavaNativeRef() {
+            jniThreadEnv.getEnv()->DeleteGlobalRef(javaGlobalRef);
+        }
+        
+        jobject javaGlobalRef;
+};
 
 class PxControllerBehaviorCallbackImpl : SimpleControllerBehaviorCallback {
     public:
@@ -551,6 +551,11 @@ JNIEXPORT void JNICALL Java_physx_PxTopLevelFunctions_00024Raw_ScaleRigidActor(J
 }
 JNIEXPORT void JNICALL Java_physx_PxTopLevelFunctions_00024Raw_IntegrateTransform(JNIEnv*, jclass, jlong curTrans, jlong linvel, jlong angvel, jfloat timeStep, jlong result) {
     PxTopLevelFunctions::IntegrateTransform(*((physx::PxTransform*) curTrans), *((physx::PxVec3*) linvel), *((physx::PxVec3*) angvel), timeStep, *((physx::PxTransform*) result));
+}
+JNIEXPORT jlong JNICALL Java_physx_PxTopLevelFunctions_00024Raw_GetTriangleMeshSDFDimensions(JNIEnv*, jclass, jlong mesh) {
+    static thread_local physx::PxDim3 _cache = PxTopLevelFunctions::GetTriangleMeshSDFDimensions(*((physx::PxTriangleMesh*) mesh));
+    _cache = PxTopLevelFunctions::GetTriangleMeshSDFDimensions(*((physx::PxTriangleMesh*) mesh));
+    return (jlong) &_cache;
 }
 JNIEXPORT jint JNICALL Java_physx_PxTopLevelFunctions_00024Raw_getPHYSICS_1VERSION(JNIEnv*, jclass) {
     return (jint) PxTopLevelFunctions::PHYSICS_VERSION;
@@ -2113,6 +2118,41 @@ JNIEXPORT void JNICALL Java_physx_common_PxDefaultErrorCallback_00024Raw_destroy
     delete (physx::PxDefaultErrorCallback*) _address;
 }
 
+// PxDim3
+JNIEXPORT jint JNICALL Java_physx_common_PxDim3__1_1sizeOf(JNIEnv*, jclass) {
+    return sizeof(physx::PxDim3);
+}
+JNIEXPORT jlong JNICALL Java_physx_common_PxDim3_00024Raw_PxDim3(JNIEnv*, jclass) {
+    return (jlong) new physx::PxDim3();
+}
+JNIEXPORT void JNICALL Java_physx_common_PxDim3_00024Raw_destroy(JNIEnv*, jclass, jlong _address) {
+    delete (physx::PxDim3*) _address;
+}
+JNIEXPORT jint JNICALL Java_physx_common_PxDim3_00024Raw_getX(JNIEnv*, jclass, jlong _address) {
+    physx::PxDim3* _self = (physx::PxDim3*) _address;
+    return (jint) _self->x;
+}
+JNIEXPORT void JNICALL Java_physx_common_PxDim3_00024Raw_setX(JNIEnv*, jclass, jlong _address, jint value) {
+    physx::PxDim3* _self = (physx::PxDim3*) _address;
+    _self->x = value;
+}
+JNIEXPORT jint JNICALL Java_physx_common_PxDim3_00024Raw_getY(JNIEnv*, jclass, jlong _address) {
+    physx::PxDim3* _self = (physx::PxDim3*) _address;
+    return (jint) _self->y;
+}
+JNIEXPORT void JNICALL Java_physx_common_PxDim3_00024Raw_setY(JNIEnv*, jclass, jlong _address, jint value) {
+    physx::PxDim3* _self = (physx::PxDim3*) _address;
+    _self->y = value;
+}
+JNIEXPORT jint JNICALL Java_physx_common_PxDim3_00024Raw_getZ(JNIEnv*, jclass, jlong _address) {
+    physx::PxDim3* _self = (physx::PxDim3*) _address;
+    return (jint) _self->z;
+}
+JNIEXPORT void JNICALL Java_physx_common_PxDim3_00024Raw_setZ(JNIEnv*, jclass, jlong _address, jint value) {
+    physx::PxDim3* _self = (physx::PxDim3*) _address;
+    _self->z = value;
+}
+
 // PxErrorCallback
 JNIEXPORT jint JNICALL Java_physx_common_PxErrorCallback__1_1sizeOf(JNIEnv*, jclass) {
     return sizeof(physx::PxErrorCallback);
@@ -3288,6 +3328,133 @@ JNIEXPORT void JNICALL Java_physx_cooking_PxMidphaseDesc_00024Raw_setMBVH34Desc(
     _self->mBVH34Desc = *((physx::PxBVH34MidphaseDesc*) value);
 }
 
+// PxSDFDesc
+JNIEXPORT jint JNICALL Java_physx_cooking_PxSDFDesc__1_1sizeOf(JNIEnv*, jclass) {
+    return sizeof(physx::PxSDFDesc);
+}
+JNIEXPORT jlong JNICALL Java_physx_cooking_PxSDFDesc_00024Raw_PxSDFDesc(JNIEnv*, jclass) {
+    return (jlong) new physx::PxSDFDesc();
+}
+JNIEXPORT jboolean JNICALL Java_physx_cooking_PxSDFDesc_00024Raw_isValid(JNIEnv*, jclass, jlong _address) {
+    physx::PxSDFDesc* self = (physx::PxSDFDesc*) _address;
+    return (jboolean) self->isValid();
+}
+JNIEXPORT void JNICALL Java_physx_cooking_PxSDFDesc_00024Raw_destroy(JNIEnv*, jclass, jlong _address) {
+    delete (physx::PxSDFDesc*) _address;
+}
+JNIEXPORT jlong JNICALL Java_physx_cooking_PxSDFDesc_00024Raw_getSdf(JNIEnv*, jclass, jlong _address) {
+    physx::PxSDFDesc* _self = (physx::PxSDFDesc*) _address;
+    return (jlong) &_self->sdf;
+}
+JNIEXPORT void JNICALL Java_physx_cooking_PxSDFDesc_00024Raw_setSdf(JNIEnv*, jclass, jlong _address, jlong value) {
+    physx::PxSDFDesc* _self = (physx::PxSDFDesc*) _address;
+    _self->sdf = *((physx::PxBoundedData*) value);
+}
+JNIEXPORT jlong JNICALL Java_physx_cooking_PxSDFDesc_00024Raw_getDims(JNIEnv*, jclass, jlong _address) {
+    physx::PxSDFDesc* _self = (physx::PxSDFDesc*) _address;
+    return (jlong) &_self->dims;
+}
+JNIEXPORT void JNICALL Java_physx_cooking_PxSDFDesc_00024Raw_setDims(JNIEnv*, jclass, jlong _address, jlong value) {
+    physx::PxSDFDesc* _self = (physx::PxSDFDesc*) _address;
+    _self->dims = *((physx::PxDim3*) value);
+}
+JNIEXPORT jlong JNICALL Java_physx_cooking_PxSDFDesc_00024Raw_getMeshLower(JNIEnv*, jclass, jlong _address) {
+    physx::PxSDFDesc* _self = (physx::PxSDFDesc*) _address;
+    return (jlong) &_self->meshLower;
+}
+JNIEXPORT void JNICALL Java_physx_cooking_PxSDFDesc_00024Raw_setMeshLower(JNIEnv*, jclass, jlong _address, jlong value) {
+    physx::PxSDFDesc* _self = (physx::PxSDFDesc*) _address;
+    _self->meshLower = *((physx::PxVec3*) value);
+}
+JNIEXPORT jfloat JNICALL Java_physx_cooking_PxSDFDesc_00024Raw_getSpacing(JNIEnv*, jclass, jlong _address) {
+    physx::PxSDFDesc* _self = (physx::PxSDFDesc*) _address;
+    return (jfloat) _self->spacing;
+}
+JNIEXPORT void JNICALL Java_physx_cooking_PxSDFDesc_00024Raw_setSpacing(JNIEnv*, jclass, jlong _address, jfloat value) {
+    physx::PxSDFDesc* _self = (physx::PxSDFDesc*) _address;
+    _self->spacing = value;
+}
+JNIEXPORT jint JNICALL Java_physx_cooking_PxSDFDesc_00024Raw_getSubgridSize(JNIEnv*, jclass, jlong _address) {
+    physx::PxSDFDesc* _self = (physx::PxSDFDesc*) _address;
+    return (jint) _self->subgridSize;
+}
+JNIEXPORT void JNICALL Java_physx_cooking_PxSDFDesc_00024Raw_setSubgridSize(JNIEnv*, jclass, jlong _address, jint value) {
+    physx::PxSDFDesc* _self = (physx::PxSDFDesc*) _address;
+    _self->subgridSize = value;
+}
+JNIEXPORT jint JNICALL Java_physx_cooking_PxSDFDesc_00024Raw_getBitsPerSubgridPixel(JNIEnv*, jclass, jlong _address) {
+    physx::PxSDFDesc* _self = (physx::PxSDFDesc*) _address;
+    return (jint) _self->bitsPerSubgridPixel;
+}
+JNIEXPORT void JNICALL Java_physx_cooking_PxSDFDesc_00024Raw_setBitsPerSubgridPixel(JNIEnv*, jclass, jlong _address, jint value) {
+    physx::PxSDFDesc* _self = (physx::PxSDFDesc*) _address;
+    _self->bitsPerSubgridPixel = (PxSdfBitsPerSubgridPixelEnum) value;
+}
+JNIEXPORT jlong JNICALL Java_physx_cooking_PxSDFDesc_00024Raw_getSdfSubgrids3DTexBlockDim(JNIEnv*, jclass, jlong _address) {
+    physx::PxSDFDesc* _self = (physx::PxSDFDesc*) _address;
+    return (jlong) &_self->sdfSubgrids3DTexBlockDim;
+}
+JNIEXPORT void JNICALL Java_physx_cooking_PxSDFDesc_00024Raw_setSdfSubgrids3DTexBlockDim(JNIEnv*, jclass, jlong _address, jlong value) {
+    physx::PxSDFDesc* _self = (physx::PxSDFDesc*) _address;
+    _self->sdfSubgrids3DTexBlockDim = *((physx::PxDim3*) value);
+}
+JNIEXPORT jlong JNICALL Java_physx_cooking_PxSDFDesc_00024Raw_getSdfSubgrids(JNIEnv*, jclass, jlong _address) {
+    physx::PxSDFDesc* _self = (physx::PxSDFDesc*) _address;
+    return (jlong) &_self->sdfSubgrids;
+}
+JNIEXPORT void JNICALL Java_physx_cooking_PxSDFDesc_00024Raw_setSdfSubgrids(JNIEnv*, jclass, jlong _address, jlong value) {
+    physx::PxSDFDesc* _self = (physx::PxSDFDesc*) _address;
+    _self->sdfSubgrids = *((physx::PxBoundedData*) value);
+}
+JNIEXPORT jlong JNICALL Java_physx_cooking_PxSDFDesc_00024Raw_getSdfStartSlots(JNIEnv*, jclass, jlong _address) {
+    physx::PxSDFDesc* _self = (physx::PxSDFDesc*) _address;
+    return (jlong) &_self->sdfStartSlots;
+}
+JNIEXPORT void JNICALL Java_physx_cooking_PxSDFDesc_00024Raw_setSdfStartSlots(JNIEnv*, jclass, jlong _address, jlong value) {
+    physx::PxSDFDesc* _self = (physx::PxSDFDesc*) _address;
+    _self->sdfStartSlots = *((physx::PxBoundedData*) value);
+}
+JNIEXPORT jfloat JNICALL Java_physx_cooking_PxSDFDesc_00024Raw_getSubgridsMinSdfValue(JNIEnv*, jclass, jlong _address) {
+    physx::PxSDFDesc* _self = (physx::PxSDFDesc*) _address;
+    return (jfloat) _self->subgridsMinSdfValue;
+}
+JNIEXPORT void JNICALL Java_physx_cooking_PxSDFDesc_00024Raw_setSubgridsMinSdfValue(JNIEnv*, jclass, jlong _address, jfloat value) {
+    physx::PxSDFDesc* _self = (physx::PxSDFDesc*) _address;
+    _self->subgridsMinSdfValue = value;
+}
+JNIEXPORT jfloat JNICALL Java_physx_cooking_PxSDFDesc_00024Raw_getSubgridsMaxSdfValue(JNIEnv*, jclass, jlong _address) {
+    physx::PxSDFDesc* _self = (physx::PxSDFDesc*) _address;
+    return (jfloat) _self->subgridsMaxSdfValue;
+}
+JNIEXPORT void JNICALL Java_physx_cooking_PxSDFDesc_00024Raw_setSubgridsMaxSdfValue(JNIEnv*, jclass, jlong _address, jfloat value) {
+    physx::PxSDFDesc* _self = (physx::PxSDFDesc*) _address;
+    _self->subgridsMaxSdfValue = value;
+}
+JNIEXPORT jlong JNICALL Java_physx_cooking_PxSDFDesc_00024Raw_getSdfBounds(JNIEnv*, jclass, jlong _address) {
+    physx::PxSDFDesc* _self = (physx::PxSDFDesc*) _address;
+    return (jlong) &_self->sdfBounds;
+}
+JNIEXPORT void JNICALL Java_physx_cooking_PxSDFDesc_00024Raw_setSdfBounds(JNIEnv*, jclass, jlong _address, jlong value) {
+    physx::PxSDFDesc* _self = (physx::PxSDFDesc*) _address;
+    _self->sdfBounds = *((physx::PxBounds3*) value);
+}
+JNIEXPORT jfloat JNICALL Java_physx_cooking_PxSDFDesc_00024Raw_getNarrowBandThicknessRelativeToSdfBoundsDiagonal(JNIEnv*, jclass, jlong _address) {
+    physx::PxSDFDesc* _self = (physx::PxSDFDesc*) _address;
+    return (jfloat) _self->narrowBandThicknessRelativeToSdfBoundsDiagonal;
+}
+JNIEXPORT void JNICALL Java_physx_cooking_PxSDFDesc_00024Raw_setNarrowBandThicknessRelativeToSdfBoundsDiagonal(JNIEnv*, jclass, jlong _address, jfloat value) {
+    physx::PxSDFDesc* _self = (physx::PxSDFDesc*) _address;
+    _self->narrowBandThicknessRelativeToSdfBoundsDiagonal = value;
+}
+JNIEXPORT jint JNICALL Java_physx_cooking_PxSDFDesc_00024Raw_getNumThreadsForSdfConstruction(JNIEnv*, jclass, jlong _address) {
+    physx::PxSDFDesc* _self = (physx::PxSDFDesc*) _address;
+    return (jint) _self->numThreadsForSdfConstruction;
+}
+JNIEXPORT void JNICALL Java_physx_cooking_PxSDFDesc_00024Raw_setNumThreadsForSdfConstruction(JNIEnv*, jclass, jlong _address, jint value) {
+    physx::PxSDFDesc* _self = (physx::PxSDFDesc*) _address;
+    _self->numThreadsForSdfConstruction = value;
+}
+
 // PxTriangleMeshDesc
 JNIEXPORT jint JNICALL Java_physx_cooking_PxTriangleMeshDesc__1_1sizeOf(JNIEnv*, jclass) {
     return sizeof(physx::PxTriangleMeshDesc);
@@ -3308,6 +3475,14 @@ JNIEXPORT jlong JNICALL Java_physx_cooking_PxTriangleMeshDesc_00024Raw_getMateri
 JNIEXPORT void JNICALL Java_physx_cooking_PxTriangleMeshDesc_00024Raw_setMaterialIndices(JNIEnv*, jclass, jlong _address, jlong value) {
     physx::PxTriangleMeshDesc* _self = (physx::PxTriangleMeshDesc*) _address;
     _self->materialIndices = *((PxTypedBoundedData_PxU16Const*) value);
+}
+JNIEXPORT jlong JNICALL Java_physx_cooking_PxTriangleMeshDesc_00024Raw_getSdfDesc(JNIEnv*, jclass, jlong _address) {
+    physx::PxTriangleMeshDesc* _self = (physx::PxTriangleMeshDesc*) _address;
+    return (jlong) _self->sdfDesc;
+}
+JNIEXPORT void JNICALL Java_physx_cooking_PxTriangleMeshDesc_00024Raw_setSdfDesc(JNIEnv*, jclass, jlong _address, jlong value) {
+    physx::PxTriangleMeshDesc* _self = (physx::PxTriangleMeshDesc*) _address;
+    _self->sdfDesc = (physx::PxSDFDesc*) value;
 }
 
 // PxConvexFlagEnum
@@ -3362,6 +3537,9 @@ JNIEXPORT jint JNICALL Java_physx_cooking_PxMeshPreprocessingFlagEnum__1geteDISA
 JNIEXPORT jint JNICALL Java_physx_cooking_PxMeshPreprocessingFlagEnum__1geteFORCE_132BIT_1INDICES(JNIEnv*, jclass) {
     return PxMeshPreprocessingFlagEnum::eFORCE_32BIT_INDICES;
 }
+JNIEXPORT jint JNICALL Java_physx_cooking_PxMeshPreprocessingFlagEnum__1geteENABLE_1INERTIA(JNIEnv*, jclass) {
+    return PxMeshPreprocessingFlagEnum::eENABLE_INERTIA;
+}
 
 // PxMeshMidPhaseEnum
 JNIEXPORT jint JNICALL Java_physx_cooking_PxMeshMidPhaseEnum__1geteBVH33(JNIEnv*, jclass) {
@@ -3369,6 +3547,17 @@ JNIEXPORT jint JNICALL Java_physx_cooking_PxMeshMidPhaseEnum__1geteBVH33(JNIEnv*
 }
 JNIEXPORT jint JNICALL Java_physx_cooking_PxMeshMidPhaseEnum__1geteBVH34(JNIEnv*, jclass) {
     return PxMeshMidPhaseEnum::eBVH34;
+}
+
+// PxSdfBitsPerSubgridPixelEnum
+JNIEXPORT jint JNICALL Java_physx_cooking_PxSdfBitsPerSubgridPixelEnum__1gete8_1BIT_1PER_1PIXEL(JNIEnv*, jclass) {
+    return PxSdfBitsPerSubgridPixelEnum::e8_BIT_PER_PIXEL;
+}
+JNIEXPORT jint JNICALL Java_physx_cooking_PxSdfBitsPerSubgridPixelEnum__1gete16_1BIT_1PER_1PIXEL(JNIEnv*, jclass) {
+    return PxSdfBitsPerSubgridPixelEnum::e16_BIT_PER_PIXEL;
+}
+JNIEXPORT jint JNICALL Java_physx_cooking_PxSdfBitsPerSubgridPixelEnum__1gete32_1BIT_1PER_1PIXEL(JNIEnv*, jclass) {
+    return PxSdfBitsPerSubgridPixelEnum::e32_BIT_PER_PIXEL;
 }
 
 // PxGjkQueryProximityInfoResult
@@ -3842,6 +4031,14 @@ JNIEXPORT void JNICALL Java_physx_extensions_PxD6Joint_00024Raw_setDriveVelocity
 JNIEXPORT void JNICALL Java_physx_extensions_PxD6Joint_00024Raw_getDriveVelocity(JNIEnv*, jclass, jlong _address, jlong linear, jlong angular) {
     physx::PxD6Joint* self = (physx::PxD6Joint*) _address;
     self->getDriveVelocity(*((physx::PxVec3*) linear), *((physx::PxVec3*) angular));
+}
+JNIEXPORT void JNICALL Java_physx_extensions_PxD6Joint_00024Raw_setAngularDriveConfig(JNIEnv*, jclass, jlong _address, jint config) {
+    physx::PxD6Joint* self = (physx::PxD6Joint*) _address;
+    self->setAngularDriveConfig((PxD6AngularDriveConfigEnum) config);
+}
+JNIEXPORT jint JNICALL Java_physx_extensions_PxD6Joint_00024Raw_getAngularDriveConfig(JNIEnv*, jclass, jlong _address) {
+    physx::PxD6Joint* self = (physx::PxD6Joint*) _address;
+    return (jint) self->getAngularDriveConfig();
 }
 JNIEXPORT void JNICALL Java_physx_extensions_PxD6Joint_00024Raw_destroy(JNIEnv*, jclass, jlong _address) {
     delete (physx::PxD6Joint*) _address;
@@ -4964,6 +5161,17 @@ JNIEXPORT void JNICALL Java_physx_extensions_PxSerializationRegistry_00024Raw_re
     self->release();
 }
 
+// PxD6AngularDriveConfigEnum
+JNIEXPORT jint JNICALL Java_physx_extensions_PxD6AngularDriveConfigEnum__1geteSWING_1TWIST(JNIEnv*, jclass) {
+    return PxD6AngularDriveConfigEnum::eSWING_TWIST;
+}
+JNIEXPORT jint JNICALL Java_physx_extensions_PxD6AngularDriveConfigEnum__1geteSLERP(JNIEnv*, jclass) {
+    return PxD6AngularDriveConfigEnum::eSLERP;
+}
+JNIEXPORT jint JNICALL Java_physx_extensions_PxD6AngularDriveConfigEnum__1geteLEGACY(JNIEnv*, jclass) {
+    return PxD6AngularDriveConfigEnum::eLEGACY;
+}
+
 // PxD6AxisEnum
 JNIEXPORT jint JNICALL Java_physx_extensions_PxD6AxisEnum__1geteX(JNIEnv*, jclass) {
     return PxD6AxisEnum::eX;
@@ -5002,6 +5210,12 @@ JNIEXPORT jint JNICALL Java_physx_extensions_PxD6DriveEnum__1geteTWIST(JNIEnv*, 
 }
 JNIEXPORT jint JNICALL Java_physx_extensions_PxD6DriveEnum__1geteSLERP(JNIEnv*, jclass) {
     return PxD6DriveEnum::eSLERP;
+}
+JNIEXPORT jint JNICALL Java_physx_extensions_PxD6DriveEnum__1geteSWING1(JNIEnv*, jclass) {
+    return PxD6DriveEnum::eSWING1;
+}
+JNIEXPORT jint JNICALL Java_physx_extensions_PxD6DriveEnum__1geteSWING2(JNIEnv*, jclass) {
+    return PxD6DriveEnum::eSWING2;
 }
 
 // PxD6JointDriveFlagEnum
@@ -5269,6 +5483,196 @@ JNIEXPORT jfloat JNICALL Java_physx_geometry_PxContactPoint_00024Raw_getDamping(
 JNIEXPORT void JNICALL Java_physx_geometry_PxContactPoint_00024Raw_setDamping(JNIEnv*, jclass, jlong _address, jfloat value) {
     physx::PxContactPoint* _self = (physx::PxContactPoint*) _address;
     _self->damping = value;
+}
+
+// PxConvexCoreBox
+JNIEXPORT jint JNICALL Java_physx_geometry_PxConvexCoreBox__1_1sizeOf(JNIEnv*, jclass) {
+    return sizeof(PxConvexCoreBox);
+}
+JNIEXPORT jlong JNICALL Java_physx_geometry_PxConvexCoreBox_00024Raw_PxConvexCoreBox_1placed(JNIEnv*, jclass, jlong _placement_address, jfloat eX, jfloat eY, jfloat eZ) {
+    return (jlong) new((void*)_placement_address) PxConvexCoreBox(eX, eY, eZ);
+}
+JNIEXPORT jlong JNICALL Java_physx_geometry_PxConvexCoreBox_00024Raw_PxConvexCoreBox(JNIEnv*, jclass, jfloat eX, jfloat eY, jfloat eZ) {
+    return (jlong) new PxConvexCoreBox(eX, eY, eZ);
+}
+JNIEXPORT void JNICALL Java_physx_geometry_PxConvexCoreBox_00024Raw_destroy(JNIEnv*, jclass, jlong _address) {
+    delete (PxConvexCoreBox*) _address;
+}
+JNIEXPORT jlong JNICALL Java_physx_geometry_PxConvexCoreBox_00024Raw_getExtents(JNIEnv*, jclass, jlong _address) {
+    PxConvexCoreBox* _self = (PxConvexCoreBox*) _address;
+    return (jlong) &_self->extents;
+}
+JNIEXPORT void JNICALL Java_physx_geometry_PxConvexCoreBox_00024Raw_setExtents(JNIEnv*, jclass, jlong _address, jlong value) {
+    PxConvexCoreBox* _self = (PxConvexCoreBox*) _address;
+    _self->extents = *((physx::PxVec3*) value);
+}
+
+// PxConvexCoreCone
+JNIEXPORT jint JNICALL Java_physx_geometry_PxConvexCoreCone__1_1sizeOf(JNIEnv*, jclass) {
+    return sizeof(PxConvexCoreCone);
+}
+JNIEXPORT jlong JNICALL Java_physx_geometry_PxConvexCoreCone_00024Raw_PxConvexCoreCone_1placed(JNIEnv*, jclass, jlong _placement_address, jfloat height, jfloat radius) {
+    return (jlong) new((void*)_placement_address) PxConvexCoreCone(height, radius);
+}
+JNIEXPORT jlong JNICALL Java_physx_geometry_PxConvexCoreCone_00024Raw_PxConvexCoreCone(JNIEnv*, jclass, jfloat height, jfloat radius) {
+    return (jlong) new PxConvexCoreCone(height, radius);
+}
+JNIEXPORT void JNICALL Java_physx_geometry_PxConvexCoreCone_00024Raw_destroy(JNIEnv*, jclass, jlong _address) {
+    delete (PxConvexCoreCone*) _address;
+}
+JNIEXPORT jfloat JNICALL Java_physx_geometry_PxConvexCoreCone_00024Raw_getHeight(JNIEnv*, jclass, jlong _address) {
+    PxConvexCoreCone* _self = (PxConvexCoreCone*) _address;
+    return (jfloat) _self->height;
+}
+JNIEXPORT void JNICALL Java_physx_geometry_PxConvexCoreCone_00024Raw_setHeight(JNIEnv*, jclass, jlong _address, jfloat value) {
+    PxConvexCoreCone* _self = (PxConvexCoreCone*) _address;
+    _self->height = value;
+}
+JNIEXPORT jfloat JNICALL Java_physx_geometry_PxConvexCoreCone_00024Raw_getRadius(JNIEnv*, jclass, jlong _address) {
+    PxConvexCoreCone* _self = (PxConvexCoreCone*) _address;
+    return (jfloat) _self->radius;
+}
+JNIEXPORT void JNICALL Java_physx_geometry_PxConvexCoreCone_00024Raw_setRadius(JNIEnv*, jclass, jlong _address, jfloat value) {
+    PxConvexCoreCone* _self = (PxConvexCoreCone*) _address;
+    _self->radius = value;
+}
+
+// PxConvexCoreCylinder
+JNIEXPORT jint JNICALL Java_physx_geometry_PxConvexCoreCylinder__1_1sizeOf(JNIEnv*, jclass) {
+    return sizeof(PxConvexCoreCylinder);
+}
+JNIEXPORT jlong JNICALL Java_physx_geometry_PxConvexCoreCylinder_00024Raw_PxConvexCoreCylinder_1placed(JNIEnv*, jclass, jlong _placement_address, jfloat height, jfloat radius) {
+    return (jlong) new((void*)_placement_address) PxConvexCoreCylinder(height, radius);
+}
+JNIEXPORT jlong JNICALL Java_physx_geometry_PxConvexCoreCylinder_00024Raw_PxConvexCoreCylinder(JNIEnv*, jclass, jfloat height, jfloat radius) {
+    return (jlong) new PxConvexCoreCylinder(height, radius);
+}
+JNIEXPORT void JNICALL Java_physx_geometry_PxConvexCoreCylinder_00024Raw_destroy(JNIEnv*, jclass, jlong _address) {
+    delete (PxConvexCoreCylinder*) _address;
+}
+JNIEXPORT jfloat JNICALL Java_physx_geometry_PxConvexCoreCylinder_00024Raw_getHeight(JNIEnv*, jclass, jlong _address) {
+    PxConvexCoreCylinder* _self = (PxConvexCoreCylinder*) _address;
+    return (jfloat) _self->height;
+}
+JNIEXPORT void JNICALL Java_physx_geometry_PxConvexCoreCylinder_00024Raw_setHeight(JNIEnv*, jclass, jlong _address, jfloat value) {
+    PxConvexCoreCylinder* _self = (PxConvexCoreCylinder*) _address;
+    _self->height = value;
+}
+JNIEXPORT jfloat JNICALL Java_physx_geometry_PxConvexCoreCylinder_00024Raw_getRadius(JNIEnv*, jclass, jlong _address) {
+    PxConvexCoreCylinder* _self = (PxConvexCoreCylinder*) _address;
+    return (jfloat) _self->radius;
+}
+JNIEXPORT void JNICALL Java_physx_geometry_PxConvexCoreCylinder_00024Raw_setRadius(JNIEnv*, jclass, jlong _address, jfloat value) {
+    PxConvexCoreCylinder* _self = (PxConvexCoreCylinder*) _address;
+    _self->radius = value;
+}
+
+// PxConvexCoreEllipsoid
+JNIEXPORT jint JNICALL Java_physx_geometry_PxConvexCoreEllipsoid__1_1sizeOf(JNIEnv*, jclass) {
+    return sizeof(PxConvexCoreEllipsoid);
+}
+JNIEXPORT jlong JNICALL Java_physx_geometry_PxConvexCoreEllipsoid_00024Raw_PxConvexCoreEllipsoid_1placed(JNIEnv*, jclass, jlong _placement_address, jfloat rX, jfloat rY, jfloat rZ) {
+    return (jlong) new((void*)_placement_address) PxConvexCoreEllipsoid(rX, rY, rZ);
+}
+JNIEXPORT jlong JNICALL Java_physx_geometry_PxConvexCoreEllipsoid_00024Raw_PxConvexCoreEllipsoid(JNIEnv*, jclass, jfloat rX, jfloat rY, jfloat rZ) {
+    return (jlong) new PxConvexCoreEllipsoid(rX, rY, rZ);
+}
+JNIEXPORT void JNICALL Java_physx_geometry_PxConvexCoreEllipsoid_00024Raw_destroy(JNIEnv*, jclass, jlong _address) {
+    delete (PxConvexCoreEllipsoid*) _address;
+}
+JNIEXPORT jlong JNICALL Java_physx_geometry_PxConvexCoreEllipsoid_00024Raw_getRadii(JNIEnv*, jclass, jlong _address) {
+    PxConvexCoreEllipsoid* _self = (PxConvexCoreEllipsoid*) _address;
+    return (jlong) &_self->radii;
+}
+JNIEXPORT void JNICALL Java_physx_geometry_PxConvexCoreEllipsoid_00024Raw_setRadii(JNIEnv*, jclass, jlong _address, jlong value) {
+    PxConvexCoreEllipsoid* _self = (PxConvexCoreEllipsoid*) _address;
+    _self->radii = *((physx::PxVec3*) value);
+}
+
+// PxConvexCorePoint
+JNIEXPORT jint JNICALL Java_physx_geometry_PxConvexCorePoint__1_1sizeOf(JNIEnv*, jclass) {
+    return sizeof(PxConvexCorePoint);
+}
+JNIEXPORT jlong JNICALL Java_physx_geometry_PxConvexCorePoint_00024Raw_PxConvexCorePoint_1placed(JNIEnv*, jclass, jlong _placement_address) {
+    return (jlong) new((void*)_placement_address) PxConvexCorePoint();
+}
+JNIEXPORT jlong JNICALL Java_physx_geometry_PxConvexCorePoint_00024Raw_PxConvexCorePoint(JNIEnv*, jclass) {
+    return (jlong) new PxConvexCorePoint();
+}
+JNIEXPORT void JNICALL Java_physx_geometry_PxConvexCorePoint_00024Raw_destroy(JNIEnv*, jclass, jlong _address) {
+    delete (PxConvexCorePoint*) _address;
+}
+
+// PxConvexCoreSegment
+JNIEXPORT jint JNICALL Java_physx_geometry_PxConvexCoreSegment__1_1sizeOf(JNIEnv*, jclass) {
+    return sizeof(PxConvexCoreSegment);
+}
+JNIEXPORT jlong JNICALL Java_physx_geometry_PxConvexCoreSegment_00024Raw_PxConvexCoreSegment_1placed(JNIEnv*, jclass, jlong _placement_address, jfloat length) {
+    return (jlong) new((void*)_placement_address) PxConvexCoreSegment(length);
+}
+JNIEXPORT jlong JNICALL Java_physx_geometry_PxConvexCoreSegment_00024Raw_PxConvexCoreSegment(JNIEnv*, jclass, jfloat length) {
+    return (jlong) new PxConvexCoreSegment(length);
+}
+JNIEXPORT void JNICALL Java_physx_geometry_PxConvexCoreSegment_00024Raw_destroy(JNIEnv*, jclass, jlong _address) {
+    delete (PxConvexCoreSegment*) _address;
+}
+JNIEXPORT jfloat JNICALL Java_physx_geometry_PxConvexCoreSegment_00024Raw_getLength(JNIEnv*, jclass, jlong _address) {
+    PxConvexCoreSegment* _self = (PxConvexCoreSegment*) _address;
+    return (jfloat) _self->length;
+}
+JNIEXPORT void JNICALL Java_physx_geometry_PxConvexCoreSegment_00024Raw_setLength(JNIEnv*, jclass, jlong _address, jfloat value) {
+    PxConvexCoreSegment* _self = (PxConvexCoreSegment*) _address;
+    _self->length = value;
+}
+
+// PxConvexCoreGeometry
+JNIEXPORT jint JNICALL Java_physx_geometry_PxConvexCoreGeometry__1_1sizeOf(JNIEnv*, jclass) {
+    return sizeof(physx::PxConvexCoreGeometry);
+}
+JNIEXPORT jint JNICALL Java_physx_geometry_PxConvexCoreGeometry_00024Raw_getCoreType(JNIEnv*, jclass, jlong _address) {
+    physx::PxConvexCoreGeometry* self = (physx::PxConvexCoreGeometry*) _address;
+    return (jint) self->getCoreType();
+}
+JNIEXPORT jlong JNICALL Java_physx_geometry_PxConvexCoreGeometry_00024Raw_getCoreData(JNIEnv*, jclass, jlong _address) {
+    physx::PxConvexCoreGeometry* self = (physx::PxConvexCoreGeometry*) _address;
+    return (jlong) self->getCoreData();
+}
+JNIEXPORT jfloat JNICALL Java_physx_geometry_PxConvexCoreGeometry_00024Raw_getMargin(JNIEnv*, jclass, jlong _address) {
+    physx::PxConvexCoreGeometry* self = (physx::PxConvexCoreGeometry*) _address;
+    return (jfloat) self->getMargin();
+}
+JNIEXPORT jboolean JNICALL Java_physx_geometry_PxConvexCoreGeometry_00024Raw_isValid(JNIEnv*, jclass, jlong _address) {
+    physx::PxConvexCoreGeometry* self = (physx::PxConvexCoreGeometry*) _address;
+    return (jboolean) self->isValid();
+}
+JNIEXPORT void JNICALL Java_physx_geometry_PxConvexCoreGeometry_00024Raw_destroy(JNIEnv*, jclass, jlong _address) {
+    delete (physx::PxConvexCoreGeometry*) _address;
+}
+
+// PxConvexCoreGeometryFactory
+JNIEXPORT jint JNICALL Java_physx_geometry_PxConvexCoreGeometryFactory__1_1sizeOf(JNIEnv*, jclass) {
+    return sizeof(PxConvexCoreGeometryFactory);
+}
+JNIEXPORT jlong JNICALL Java_physx_geometry_PxConvexCoreGeometryFactory_00024Raw_createFromBox(JNIEnv*, jclass, jlong box, jfloat margin) {
+    return (jlong) PxConvexCoreGeometryFactory::createFromBox(*((PxConvexCoreBox*) box), margin);
+}
+JNIEXPORT jlong JNICALL Java_physx_geometry_PxConvexCoreGeometryFactory_00024Raw_createFromCone(JNIEnv*, jclass, jlong cone, jfloat margin) {
+    return (jlong) PxConvexCoreGeometryFactory::createFromCone(*((PxConvexCoreCone*) cone), margin);
+}
+JNIEXPORT jlong JNICALL Java_physx_geometry_PxConvexCoreGeometryFactory_00024Raw_createFromCylinder(JNIEnv*, jclass, jlong cylinder, jfloat margin) {
+    return (jlong) PxConvexCoreGeometryFactory::createFromCylinder(*((PxConvexCoreCylinder*) cylinder), margin);
+}
+JNIEXPORT jlong JNICALL Java_physx_geometry_PxConvexCoreGeometryFactory_00024Raw_createFromEllipsoid(JNIEnv*, jclass, jlong ellipsoid, jfloat margin) {
+    return (jlong) PxConvexCoreGeometryFactory::createFromEllipsoid(*((PxConvexCoreEllipsoid*) ellipsoid), margin);
+}
+JNIEXPORT jlong JNICALL Java_physx_geometry_PxConvexCoreGeometryFactory_00024Raw_createFromPoint(JNIEnv*, jclass, jlong point, jfloat margin) {
+    return (jlong) PxConvexCoreGeometryFactory::createFromPoint(*((PxConvexCorePoint*) point), margin);
+}
+JNIEXPORT jlong JNICALL Java_physx_geometry_PxConvexCoreGeometryFactory_00024Raw_createFromSegment(JNIEnv*, jclass, jlong segment, jfloat margin) {
+    return (jlong) PxConvexCoreGeometryFactory::createFromSegment(*((PxConvexCoreSegment*) segment), margin);
+}
+JNIEXPORT void JNICALL Java_physx_geometry_PxConvexCoreGeometryFactory_00024Raw_destroy(JNIEnv*, jclass, jlong _address) {
+    delete (PxConvexCoreGeometryFactory*) _address;
 }
 
 // PxConvexMesh
@@ -6387,6 +6791,16 @@ JNIEXPORT jlong JNICALL Java_physx_geometry_PxTriangleMesh_00024Raw_getLocalBoun
     _cache = self->getLocalBounds();
     return (jlong) &_cache;
 }
+JNIEXPORT jlong JNICALL Java_physx_geometry_PxTriangleMesh_00024Raw_getSDF(JNIEnv*, jclass, jlong _address) {
+    physx::PxTriangleMesh* self = (physx::PxTriangleMesh*) _address;
+    static thread_local PxRealConstPtr _cache = self->getSDF();
+    _cache = self->getSDF();
+    return (jlong) &_cache;
+}
+JNIEXPORT void JNICALL Java_physx_geometry_PxTriangleMesh_00024Raw_setPreferSDFProjection(JNIEnv*, jclass, jlong _address, jboolean prefer) {
+    physx::PxTriangleMesh* self = (physx::PxTriangleMesh*) _address;
+    self->setPreferSDFProjection(prefer);
+}
 
 // PxTriangleMeshAnalysisResults
 JNIEXPORT jint JNICALL Java_physx_geometry_PxTriangleMeshAnalysisResults__1_1sizeOf(JNIEnv*, jclass) {
@@ -6494,6 +6908,26 @@ JNIEXPORT void JNICALL Java_physx_geometry_PxTriangleMeshGeometry_00024Raw_setTr
     _self->triangleMesh = (physx::PxTriangleMesh*) value;
 }
 
+// PxConvexCoreTypeEnum
+JNIEXPORT jint JNICALL Java_physx_geometry_PxConvexCoreTypeEnum__1getePOINT(JNIEnv*, jclass) {
+    return PxConvexCoreTypeEnum::ePOINT;
+}
+JNIEXPORT jint JNICALL Java_physx_geometry_PxConvexCoreTypeEnum__1geteSEGMENT(JNIEnv*, jclass) {
+    return PxConvexCoreTypeEnum::eSEGMENT;
+}
+JNIEXPORT jint JNICALL Java_physx_geometry_PxConvexCoreTypeEnum__1geteBOX(JNIEnv*, jclass) {
+    return PxConvexCoreTypeEnum::eBOX;
+}
+JNIEXPORT jint JNICALL Java_physx_geometry_PxConvexCoreTypeEnum__1geteELLIPSOID(JNIEnv*, jclass) {
+    return PxConvexCoreTypeEnum::eELLIPSOID;
+}
+JNIEXPORT jint JNICALL Java_physx_geometry_PxConvexCoreTypeEnum__1geteCYLINDER(JNIEnv*, jclass) {
+    return PxConvexCoreTypeEnum::eCYLINDER;
+}
+JNIEXPORT jint JNICALL Java_physx_geometry_PxConvexCoreTypeEnum__1geteCONE(JNIEnv*, jclass) {
+    return PxConvexCoreTypeEnum::eCONE;
+}
+
 // PxConvexMeshGeometryFlagEnum
 JNIEXPORT jint JNICALL Java_physx_geometry_PxConvexMeshGeometryFlagEnum__1geteTIGHT_1BOUNDS(JNIEnv*, jclass) {
     return PxConvexMeshGeometryFlagEnum::eTIGHT_BOUNDS;
@@ -6512,8 +6946,17 @@ JNIEXPORT jint JNICALL Java_physx_geometry_PxGeometryTypeEnum__1geteCAPSULE(JNIE
 JNIEXPORT jint JNICALL Java_physx_geometry_PxGeometryTypeEnum__1geteBOX(JNIEnv*, jclass) {
     return PxGeometryTypeEnum::eBOX;
 }
+JNIEXPORT jint JNICALL Java_physx_geometry_PxGeometryTypeEnum__1geteCONVEXCORE(JNIEnv*, jclass) {
+    return PxGeometryTypeEnum::eCONVEXCORE;
+}
 JNIEXPORT jint JNICALL Java_physx_geometry_PxGeometryTypeEnum__1geteCONVEXMESH(JNIEnv*, jclass) {
     return PxGeometryTypeEnum::eCONVEXMESH;
+}
+JNIEXPORT jint JNICALL Java_physx_geometry_PxGeometryTypeEnum__1getePARTICLESYSTEM(JNIEnv*, jclass) {
+    return PxGeometryTypeEnum::ePARTICLESYSTEM;
+}
+JNIEXPORT jint JNICALL Java_physx_geometry_PxGeometryTypeEnum__1geteTETRAHEDRONMESH(JNIEnv*, jclass) {
+    return PxGeometryTypeEnum::eTETRAHEDRONMESH;
 }
 JNIEXPORT jint JNICALL Java_physx_geometry_PxGeometryTypeEnum__1geteTRIANGLEMESH(JNIEnv*, jclass) {
     return PxGeometryTypeEnum::eTRIANGLEMESH;
@@ -8791,6 +9234,10 @@ JNIEXPORT jlong JNICALL Java_physx_physics_PxOverlapResult_00024Raw_getTouch(JNI
     PxOverlapResult* self = (PxOverlapResult*) _address;
     return (jlong) &self->getTouch(index);
 }
+JNIEXPORT void JNICALL Java_physx_physics_PxOverlapResult_00024Raw_clear(JNIEnv*, jclass, jlong _address) {
+    PxOverlapResult* self = (PxOverlapResult*) _address;
+    self->clear();
+}
 JNIEXPORT void JNICALL Java_physx_physics_PxOverlapResult_00024Raw_destroy(JNIEnv*, jclass, jlong _address) {
     delete (PxOverlapResult*) _address;
 }
@@ -9039,6 +9486,10 @@ JNIEXPORT jint JNICALL Java_physx_physics_PxRaycastResult_00024Raw_getNbTouches(
 JNIEXPORT jlong JNICALL Java_physx_physics_PxRaycastResult_00024Raw_getTouch(JNIEnv*, jclass, jlong _address, jint index) {
     PxRaycastResult* self = (PxRaycastResult*) _address;
     return (jlong) &self->getTouch(index);
+}
+JNIEXPORT void JNICALL Java_physx_physics_PxRaycastResult_00024Raw_clear(JNIEnv*, jclass, jlong _address) {
+    PxRaycastResult* self = (PxRaycastResult*) _address;
+    self->clear();
 }
 JNIEXPORT void JNICALL Java_physx_physics_PxRaycastResult_00024Raw_destroy(JNIEnv*, jclass, jlong _address) {
     delete (PxRaycastResult*) _address;
@@ -9301,6 +9752,10 @@ JNIEXPORT jint JNICALL Java_physx_physics_PxSweepResult_00024Raw_getNbTouches(JN
 JNIEXPORT jlong JNICALL Java_physx_physics_PxSweepResult_00024Raw_getTouch(JNIEnv*, jclass, jlong _address, jint index) {
     PxSweepResult* self = (PxSweepResult*) _address;
     return (jlong) &self->getTouch(index);
+}
+JNIEXPORT void JNICALL Java_physx_physics_PxSweepResult_00024Raw_clear(JNIEnv*, jclass, jlong _address) {
+    PxSweepResult* self = (PxSweepResult*) _address;
+    self->clear();
 }
 JNIEXPORT void JNICALL Java_physx_physics_PxSweepResult_00024Raw_destroy(JNIEnv*, jclass, jlong _address) {
     delete (PxSweepResult*) _address;

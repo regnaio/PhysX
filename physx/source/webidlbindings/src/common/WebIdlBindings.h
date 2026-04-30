@@ -398,6 +398,12 @@ struct PxTopLevelFunctions {
         return PxIntegrateTransform(curTrans, linvel, angvel, timeStep, result);
     }
 
+    static physx::PxDim3 GetTriangleMeshSDFDimensions(const physx::PxTriangleMesh& mesh) {
+        physx::PxDim3 dims = {0, 0, 0};
+        mesh.getSDFDimensions(dims.x, dims.y, dims.z);
+        return dims;
+    }
+
     static bool CookTriangleMesh(const physx::PxCookingParams& params, const physx::PxTriangleMeshDesc& desc, physx::PxOutputStream& stream) {
         return PxCookTriangleMesh(params, desc, stream);
     }
@@ -685,6 +691,27 @@ struct CustomSupport : physx::PxGjkQuery::Support {
 
     private:
         physx::PxVec3 supportBuffer;
+};
+
+struct PxConvexCoreGeometryFactory {
+    static physx::PxConvexCoreGeometry* createFromBox(const physx::PxConvexCore::Box& box, physx::PxReal margin) {
+        return new physx::PxConvexCoreGeometry(box, margin);
+    }
+    static physx::PxConvexCoreGeometry* createFromCone(const physx::PxConvexCore::Cone& cone, physx::PxReal margin) {
+        return new physx::PxConvexCoreGeometry(cone, margin);
+    }
+    static physx::PxConvexCoreGeometry* createFromCylinder(const physx::PxConvexCore::Cylinder& cylinder, physx::PxReal margin) {
+        return new physx::PxConvexCoreGeometry(cylinder, margin);
+    }
+    static physx::PxConvexCoreGeometry* createFromEllipsoid(const physx::PxConvexCore::Ellipsoid& ellipsoid, physx::PxReal margin) {
+        return new physx::PxConvexCoreGeometry(ellipsoid, margin);
+    }
+    static physx::PxConvexCoreGeometry* createFromPoint(const physx::PxConvexCore::Point& point, physx::PxReal margin) {
+        return new physx::PxConvexCoreGeometry(point, margin);
+    }
+    static physx::PxConvexCoreGeometry* createFromSegment(const physx::PxConvexCore::Segment& segment, physx::PxReal margin) {
+        return new physx::PxConvexCoreGeometry(segment, margin);
+    }
 };
 
 #endif
